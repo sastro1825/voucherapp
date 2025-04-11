@@ -2,7 +2,12 @@
 
 @section('title', 'Redeemed Vouchers')
 
-@section('sidebar-title', 'Merchant Panel')
+@section('sidebar-title')
+    <div class="flex flex-col items-center mb-4">
+        <img src="{{ asset('images/FT.png') }}" alt="Logo" class="h-12 w-auto mb-2">
+        <span class="text-lg font-semibold text-gray-800 dark:text-gray-200">Merchant Panel</span>
+    </div>
+@endsection
 
 @section('sidebar-menu')
     <li>
@@ -10,6 +15,9 @@
     </li>
     <li>
         <a href="{{ route('merchant.redeemed-vouchers') }}" class="block p-2 bg-gray-200 dark:bg-gray-700 rounded">View Redeemed Vouchers</a>
+    </li>
+    <li>
+        <a href="{{ route('profile') }}" class="block p-2 hover:bg-gray-200 dark:hover:bg-gray-700 rounded">Profil</a>
     </li>
     <li>
         <form method="POST" action="{{ route('logout') }}">

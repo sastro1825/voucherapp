@@ -2,15 +2,34 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class Voucher extends Model
 {
-    protected $fillable = [
-        'id', 'company_name', 'value', 'created_date', 'expiration_date', 'status', 'redeemed_by', 'redeemed_at', 'send_status'
-    ];
+    use HasFactory;
+
+    protected $primaryKey = 'id';
     public $incrementing = false;
     protected $keyType = 'string';
+
+    protected $fillable = [
+        'id',
+        'company_name',
+        'value',
+        'created_date',
+        'expiration_date',
+        'status',
+        'sent_to', // Kolom baru untuk melacak pengiriman ke merchant
+        'redeemed_by',
+        'redeemed_at',
+    ];
+
+    protected $dates = [
+        'created_date',
+        'expiration_date',
+        'redeemed_at',
+    ];
 
     public function redeemedVoucher()
     {

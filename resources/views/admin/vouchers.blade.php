@@ -2,7 +2,12 @@
 
 @section('title', 'All Vouchers')
 
-@section('sidebar-title', 'Admin Panel')
+@section('sidebar-title')
+    <div class="flex flex-col items-center mb-4">
+        <img src="{{ asset('images/FT.png') }}" alt="Logo" class="h-12 w-auto mb-2">
+        <span class="text-lg font-semibold text-gray-800 dark:text-gray-200">Admin Panel</span>
+    </div>
+@endsection
 
 @section('sidebar-menu')
     <li>
@@ -16,6 +21,9 @@
     </li>
     <li>
         <a href="{{ route('admin.vouchers') }}" class="block p-2 bg-gray-200 dark:bg-gray-700 rounded">View All Vouchers</a>
+    </li>
+    <li>
+        <a href="{{ route('profile') }}" class="block p-2 hover:bg-gray-200 dark:hover:bg-gray-700 rounded">Profil</a>
     </li>
     <li>
         <form method="POST" action="{{ route('logout') }}">
@@ -37,7 +45,6 @@
             <option value="active" {{ $filter == 'active' ? 'selected' : '' }}>Active</option>
             <option value="redeemed" {{ $filter == 'redeemed' ? 'selected' : '' }}>Redeemed</option>
             <option value="expired" {{ $filter == 'expired' ? 'selected' : '' }}>Expired</option>
-            <option value="sending" {{ $filter == 'sending' ? 'selected' : '' }}>Sending</option>
         </select>
     </div>
 
@@ -54,8 +61,8 @@
                     <th class="p-2 border dark:border-gray-600">Status</th>
                     <th class="p-2 border dark:border-gray-600">Redeemed By</th>
                     <th class="p-2 border dark:border-gray-600">Redeemed At</th>
-                    <th class="p-2 border dark:border-gray-600">Send Status</th>
                     <th class="p-2 border dark:border-gray-600">Actions</th>
+                    <th class="p-2 border dark:border-gray-600">Kirim ke WhatsApp</th>
                 </tr>
             </thead>
             <tbody>
@@ -69,18 +76,122 @@
                         <td class="p-2">{{ $voucher->status }}</td>
                         <td class="p-2">{{ $voucher->redeemed_by ?? '-' }}</td>
                         <td class="p-2">{{ $voucher->redeemed_at ?? '-' }}</td>
-                        <td class="p-2">{{ ucfirst(str_replace('_', ' ', $voucher->send_status)) }}</td>
-                        <td class="p-2 flex space-x-2">
-                            <a href="{{ route('voucher.show', $voucher->id) }}" class="text-blue-600 hover:underline">Print</a>
-                            <a href="{{ route('voucher.send', $voucher->id) }}" class="text-green-600 hover:underline">Send</a>
-                            <a href="{{ route('voucher.edit', $voucher->id) }}" class="text-yellow-600 hover:underline">Edit</a>
-                            <a href="{{ route('voucher.delete', $voucher->id) }}" 
-                               onclick="return confirm('Are you sure you want to delete this voucher?')" 
-                               class="text-red-600 hover:underline">Delete</a>
+                        <td class="p-2">
+                            <div class="flex flex-row space-x-2">
+                                <a href="{{ route('voucher.send', $voucher->id) }}" 
+                                   class="bg-green-600 text-white px-3 py-1.5 rounded hover:bg-green-700 transition text-sm font-medium">
+                                    Open
+                                </a>
+                                <a href="{{ route('voucher.edit', $voucher->id) }}" 
+                                   class="bg-yellow-600 text-white px-3 py-1.5 rounded hover:bg-yellow-700 transition text-sm font-medium">
+                                    Edit
+                                </a>
+                                <form action="{{ route('voucher.delete', $voucher->id) }}" method="POST" 
+                                      onsubmit="return confirm('Apakah Anda yakin ingin menghapus voucher ini?')">
+                                    @csrf
+                                    @method('DELETE')
+                                    <button type="submit" 
+                                            class="bg-red-600 text-white px-3 py-1.5 rounded hover:bg-red-700 transition text-sm font-medium">
+                                        Delete
+                                    </button>
+                                </form>
+                            </div>
+                        </td>
+                        <td class="p-2">
+                            @if ($voucher->sent_to)
+                                <span class="text-yellow-600 dark:text-yellow-400 text-sm">
+                                    Sudah dikirim ke {{ $voucher->sent_to }}
+                                </span>
+                            @else
+                                <button type="button" 
+                                        class="open-whatsapp-modal bg-blue-600 text-white px-3 py-1.5 rounded hover:bg-blue-700 transition text-sm font-medium"
+                                        data-voucher-id="{{ $voucher->id }}">
+                                    Kirim ke WhatsApp
+                                </button>
+                            @endif
                         </td>
                     </tr>
                 @endforeach
             </tbody>
         </table>
     </div>
+
+    <!-- Modal untuk Input Username -->
+    <div id="whatsappModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 flex items-center justify-center hidden">
+        <div class="bg-white dark:bg-gray-800 p-6 rounded shadow-lg w-full max-w-md">
+            <h2 class="text-xl font-bold mb-4 text-gray-900 dark:text-gray-100">Kirim Link Voucher ke WhatsApp</h2>
+            <form id="whatsappForm" method="GET">
+                <div class="mb-4">
+                    <label for="username" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Username Merchant</label>
+                    <input type="text" 
+                           name="username" 
+                           id="username" 
+                           class="mt-1 p-2 w-full border rounded dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100" 
+                           placeholder="Masukkan username merchant" 
+                           required>
+                </div>
+                <div class="flex justify-end space-x-2">
+                    <button type="button" 
+                            id="closeModal" 
+                            class="px-4 py-2 bg-gray-500 text-white rounded hover:bg-gray-600 transition">
+                        Batal
+                    </button>
+                    <button type="submit" 
+                            class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition">
+                        Kirim
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+@endsection
+
+@section('scripts')
+    @if (session('public_url'))
+        <script>
+            window.open("{{ session('public_url') }}", "_blank");
+        </script>
+    @endif
+    <script>
+        const modal = document.getElementById('whatsappModal');
+        const closeModalBtn = document.getElementById('closeModal');
+        const form = document.getElementById('whatsappForm');
+
+        // Buka modal saat tombol "Kirim ke WhatsApp" diklik
+        document.querySelectorAll('.open-whatsapp-modal').forEach(button => {
+            button.addEventListener('click', () => {
+                const voucherId = button.getAttribute('data-voucher-id');
+                // Set action form secara dinamis
+                const url = '{{ route("voucher.send-to-merchant", ["voucherId" => "voucherIdPlaceholder", "username" => "usernamePlaceholder"]) }}'
+                    .replace('voucherIdPlaceholder', voucherId)
+                    .replace('usernamePlaceholder', ''); // Akan diisi oleh input
+                form.action = url.replace('/usernamePlaceholder', '') + '/' + document.getElementById('username').value;
+                modal.classList.remove('hidden');
+            });
+        });
+
+        // Tutup modal saat tombol "Batal" diklik
+        closeModalBtn.addEventListener('click', () => {
+            modal.classList.add('hidden');
+            form.reset();
+        });
+
+        // Update action form saat username diinput
+        document.getElementById('username').addEventListener('input', () => {
+            const username = document.getElementById('username').value;
+            const voucherId = form.action.match(/voucher\/(.+?)\/send-to-merchant/)[1];
+            const url = '{{ route("voucher.send-to-merchant", ["voucherId" => "voucherIdPlaceholder", "username" => "usernamePlaceholder"]) }}'
+                .replace('voucherIdPlaceholder', voucherId)
+                .replace('usernamePlaceholder', username);
+            form.action = url;
+        });
+
+        // Tutup modal saat klik di luar modal
+        modal.addEventListener('click', (e) => {
+            if (e.target === modal) {
+                modal.classList.add('hidden');
+                form.reset();
+            }
+        });
+    </script>
 @endsection
