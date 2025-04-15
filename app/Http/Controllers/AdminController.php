@@ -142,15 +142,8 @@ class AdminController extends Controller
             return redirect('/login');
         }
         $voucher = Voucher::findOrFail($id);
-
-        // URL publik untuk voucher
-        $publicUrl = url('/voucher/public/' . $voucher->id);
-
-        // Simulasi pengiriman ke WhatsApp dengan link publik
-        $whatsappUrl = "https://wa.me/?text=" . urlencode("Your Voucher Details: {$publicUrl}");
-
-        // Redirect kembali dengan pesan sukses dan URL untuk membuka tab baru
-        return redirect()->back()->with('success', 'Link voucher can be created')->with('public_url', $publicUrl);
+        $qrCode = QrCode::size(150)->generate($voucher->id);
+        return view('voucher.show', compact('voucher', 'qrCode'));
     }
 
     public function showPublicVoucher($id)
@@ -166,9 +159,15 @@ class AdminController extends Controller
             return redirect('/login');
         }
         $voucher = Voucher::findOrFail($id);
-        if ($request->isMethod('post')) {
-            $request->validate(['value' => 'required|numeric']);
-            $voucher->update(['value' => $request->value]);
+        if ($request->isMethod('put')) {
+            $request->validate([
+                'value' => 'required|numeric',
+                'expiration_date' => 'required|date|after:today',
+            ]);
+            $voucher->update([
+                'value' => $request->value,
+                'expiration_date' => $request->expiration_date,
+            ]);
             return redirect()->route('admin.vouchers')->with('success', 'Voucher updated successfully!');
         }
         return view('voucher.edit', compact('voucher'));
@@ -180,7 +179,11 @@ class AdminController extends Controller
             return redirect('/login');
         }
         $voucher = Voucher::findOrFail($id);
+        if ($voucher->status === 'Redeemed') {
+            return redirect()->back()->with('error', 'Cannot delete a redeemed voucher!');
+        }
         $voucher->delete();
+        Log::info('Voucher deleted successfully', ['voucher_id' => $id]);
         return redirect()->back()->with('success', 'Voucher deleted successfully!');
     }
 
