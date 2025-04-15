@@ -47,7 +47,7 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/voucher/{id}', [AdminController::class, 'showVoucher'])->name('voucher.show');
     Route::get('/voucher/{id}/send', [AdminController::class, 'sendVoucher'])->name('voucher.send');
     Route::match(['get', 'post'], '/voucher/{id}/edit', [AdminController::class, 'editVoucher'])->name('voucher.edit');
-    Route::get('/voucher/{id}/delete', [AdminController::class, 'deleteVoucher'])->name('voucher.delete');
+    Route::delete('/voucher/{id}/delete', [AdminController::class, 'deleteVoucher'])->name('voucher.delete');
     // Rute untuk mengirim link voucher ke WhatsApp
     Route::get('/voucher/{voucherId}/send-to-merchant/{username}', [AdminController::class, 'sendVoucherLinkToMerchant'])->name('voucher.send-to-merchant');
 
