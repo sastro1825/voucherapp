@@ -42,7 +42,7 @@ class AuthenticatedSessionController extends Controller
         Log::info('Session regenerated, user_id: ' . Auth::id() . ', role: ' . $user->role);
 
         if ($user->role === 'admin') {
-            return redirect()->route('admin.create-voucher'); // Ubah redirect ke Create Voucher
+            return redirect()->route('admin.create-voucher');
         } elseif ($user->role === 'merchant') {
             return redirect()->route('merchant.dashboard');
         }
@@ -71,8 +71,8 @@ class AuthenticatedSessionController extends Controller
             'password' => [
                 'required',
                 'string',
-                'min:8', // Minimal 8 karakter
-                'regex:/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/', // Harus ada huruf kecil, huruf besar, angka, dan karakter khusus
+                'min:8',
+                'regex:/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/',
                 'confirmed',
             ],
         ], [
@@ -93,12 +93,11 @@ class AuthenticatedSessionController extends Controller
             'username' => $request->username,
             'whatsapp_number' => $request->whatsapp_number,
             'password' => Hash::make($request->password),
-            'role' => 'merchant', // Default role untuk registrasi adalah merchant
+            'role' => 'merchant',
         ]);
 
         Log::info('User registered successfully', ['username' => $user->username]);
 
-        // Login otomatis setelah registrasi
         Auth::login($user);
         $request->session()->regenerate();
 
@@ -119,26 +118,23 @@ class AuthenticatedSessionController extends Controller
         $user = User::where('username', $request->username)->first();
         $token = Str::random(60);
 
-        // Simpan token di tabel password_resets
         DB::table('password_resets')->updateOrInsert(
             ['username' => $user->username],
             ['token' => $token, 'created_at' => now()]
         );
 
-        // Buat URL reset password
         $resetUrl = route('password.reset', ['token' => $token, 'username' => $user->username]);
 
-        // Kirim pesan WhatsApp menggunakan API Wablas
         $whatsappNumber = $user->whatsapp_number;
         if (!str_starts_with($whatsappNumber, '62')) {
-            $whatsappNumber = '62' . ltrim($whatsappNumber, '0'); // Pastikan format nomor benar
+            $whatsappNumber = '62' . ltrim($whatsappNumber, '0');
         }
         $message = "Reset your password here: $resetUrl";
 
         $curl = curl_init();
         $token = env('WABLAS_API_TOKEN');
-        $secretKey = env('WABLAS_SECRET_KEY'); // Tambahkan secret key jika diperlukan
-        $authHeader = $secretKey ? "$token.$secretKey" : $token; // Kombinasi token dan secret key
+        $secretKey = env('WABLAS_SECRET_KEY');
+        $authHeader = $secretKey ? "$token.$secretKey" : $token;
 
         $payload = [
             "data" => [
@@ -158,8 +154,8 @@ class AuthenticatedSessionController extends Controller
         curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
         curl_setopt($curl, CURLOPT_POSTFIELDS, json_encode($payload));
         curl_setopt($curl, CURLOPT_URL, env('WABLAS_API_URL'));
-        curl_setopt($curl, CURLOPT_SSL_VERIFYHOST, 0); // Nonaktifkan untuk pengujian lokal
-        curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, 0); // Aktifkan di produksi
+        curl_setopt($curl, CURLOPT_SSL_VERIFYHOST, 0);
+        curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, 0);
 
         $result = curl_exec($curl);
         $error = curl_error($curl);
@@ -194,8 +190,8 @@ class AuthenticatedSessionController extends Controller
             'password' => [
                 'required',
                 'string',
-                'min:8', // Minimal 8 karakter
-                'regex:/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/', // Harus ada huruf kecil, huruf besar, angka, dan karakter khusus
+                'min:8',
+                'regex:/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/',
                 'confirmed',
             ],
             'token' => 'required|string',
@@ -229,7 +225,6 @@ class AuthenticatedSessionController extends Controller
         return redirect()->route('login')->with('status', 'Kata sandi telah berhasil direset.');
     }
 
-    // Fungsi baru untuk halaman profil
     public function showProfile()
     {
         return view('auth.profile');
@@ -267,6 +262,9 @@ class AuthenticatedSessionController extends Controller
 
         Log::info('Profile updated successfully', ['username' => $user->username]);
 
-        return redirect()->route('profile')->with('success', 'Profil berhasil diperbarui!');
+        return redirect()->route('profile')->with('notification', [
+            'message' => 'Profil berhasil diperbarui!',
+            'type' => 'success'
+        ]);
     }
 }

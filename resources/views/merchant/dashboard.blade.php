@@ -28,6 +28,13 @@
 @endsection
 
 @section('content')
+    <!-- Notification -->
+    @if (session('notification'))
+        <div class="mb-6 p-4 rounded {{ session('notification.type') === 'success' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800' }}" id="notification">
+            {{ session('notification.message') }}
+        </div>
+    @endif
+
     <h1 class="text-3xl font-bold mb-6">Welcome, {{ Auth::user()->username }}!</h1>
 
     <!-- Redeem Voucher -->
@@ -52,14 +59,6 @@
                 <button id="stop-scan" class="mt-2 bg-red-600 text-white py-2 px-4 rounded hover:bg-red-700">Stop Scan</button>
             </div>
         </div>
-
-        <!-- Display Success/Error Messages -->
-        @if (session('success'))
-            <div class="mt-4 text-green-600">{{ session('success') }}</div>
-        @endif
-        @if (session('error'))
-            <div class="mt-4 text-red-600">{{ session('error') }}</div>
-        @endif
     </div>
 @endsection
 
@@ -83,10 +82,10 @@
             codeReader = new ZXing.BrowserMultiFormatReader();
             codeReader.decodeFromVideoDevice(null, 'barcode-scanner', (result, err) => {
                 if (result) {
-                    voucherIdInput.value = result.text; // Isi input dengan hasil scan
+                    voucherIdInput.value = result.text;
                     stopScanning();
                     if (confirm('Apakah Anda yakin ingin redeem voucher ini?')) {
-                        redeemForm.submit(); // Otomatis submit form setelah scan jika dikonfirmasi
+                        redeemForm.submit();
                     }
                 }
                 if (err && !(err instanceof ZXing.NotFoundException)) {
@@ -106,6 +105,14 @@
             }
             scannerContainer.classList.add('hidden');
             startScanButton.classList.remove('hidden');
+        }
+
+        // Auto-refresh after 3 seconds if notification exists
+        const notification = document.getElementById('notification');
+        if (notification) {
+            setTimeout(() => {
+                window.location.reload();
+            }, 3000);
         }
     </script>
 @endsection

@@ -22,16 +22,18 @@ class MerchantController extends Controller
         if (!Auth::check() || Auth::user()->role !== 'merchant') {
             return redirect('/login');
         }
+
         $request->validate(['voucher_id' => 'required']);
         $voucher = Voucher::find($request->voucher_id);
 
         if (!$voucher) {
-            return back()->with('error', 'Voucher not found!');
+            return redirect()->back()->with('notification', ['type' => 'error', 'message' => 'Voucher not found!']);
         }
+
         if ($voucher->status !== 'Active' || $voucher->expiration_date < now()) {
             $voucher->status = $voucher->expiration_date < now() ? 'Expired' : $voucher->status;
             $voucher->save();
-            return back()->with('error', 'Voucher is invalid or expired!');
+            return redirect()->back()->with('notification', ['type' => 'error', 'message' => 'Voucher is invalid or expired!']);
         }
 
         $voucher->update([
@@ -39,12 +41,14 @@ class MerchantController extends Controller
             'redeemed_by' => Auth::user()->username,
             'redeemed_at' => now(),
         ]);
+
         RedeemedVoucher::create([
             'voucher_id' => $voucher->id,
             'user_id' => Auth::id(),
             'redeemed_at' => now(),
         ]);
-        return back()->with('success', 'Voucher redeemed successfully!');
+
+        return redirect()->back()->with('notification', ['type' => 'success', 'message' => 'Voucher redeemed successfully!']);
     }
 
     public function redeemedVouchers()

@@ -66,18 +66,15 @@
 @endsection
 
 @section('content')
+    <!-- Notification -->
+    @if (session('notification'))
+        <div class="mb-6 p-4 rounded {{ session('notification.type') === 'success' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800' }}" id="notification">
+            {{ session('notification.message') }}
+        </div>
+    @endif
+
     <div class="mb-6 bg-white dark:bg-gray-800 p-6 rounded shadow">
         <h2 class="text-2xl font-bold mb-4">Profil {{ auth()->user()->role === 'admin' ? 'Admin' : 'Merchant' }}</h2>
-        @if (session('success'))
-            <div class="bg-green-100 text-green-700 p-4 rounded mb-4">
-                {{ session('success') }}
-            </div>
-        @endif
-        @if (session('error'))
-            <div class="bg-red-100 text-red-700 p-4 rounded mb-4">
-                {{ session('error') }}
-            </div>
-        @endif
         <form method="POST" action="{{ route('profile.update') }}">
             @csrf
             <div class="mb-4">
@@ -107,4 +104,17 @@
             </button>
         </form>
     </div>
+@endsection
+
+@section('scripts')
+    <script>
+        // Auto-hide notification and refresh after 3 seconds if notification exists
+        const notification = document.getElementById('notification');
+        if (notification) {
+            setTimeout(() => {
+                notification.style.display = 'none';
+                window.location.reload();
+            }, 3000);
+        }
+    </script>
 @endsection
