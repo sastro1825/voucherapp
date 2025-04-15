@@ -34,11 +34,20 @@
                 <label for="value" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Voucher Value</label>
                 <input type="number" name="value" id="value" value="{{ $voucher->value }}"
                        class="mt-1 block w-full p-2 border rounded dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100" required>
+                @error('value')
+                    <span class="text-red-500 text-sm">{{ $message }}</span>
+                @enderror
             </div>
-            <button type="submit" class="bg-yellow-600 text-white py-2 px-4 rounded hover:bg-yellow-700">
-                Update Voucher
-            </button>
-            <a href="{{ route('admin.vouchers') }}" class="ml-4 text-blue-600 hover:underline">Cancel</a>
+            <div class="flex space-x-4">
+                <button type="submit" class="bg-green-600 text-white py-2 px-4 rounded hover:bg-green-700 transition">
+                    Update Voucher
+                </button>
+                <a href="{{ route('admin.vouchers') }}">
+                    <button type="button" class="bg-red-600 text-white py-2 px-4 rounded hover:bg-red-700 transition">
+                        Cancel
+                    </button>
+                </a>
+            </div>
         </form>
     </div>
 @endsection
