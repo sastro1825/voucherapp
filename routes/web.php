@@ -42,6 +42,8 @@ Route::middleware(['auth'])->group(function () {
     // Create Merchant
     Route::get('/admin/create-merchant', [AdminController::class, 'showCreateMerchantForm'])->name('admin.create-merchant');
     Route::post('/admin/create-merchant', [AdminController::class, 'createMerchant'])->name('admin.create-merchant.submit');
+
+    Route::get('/admin/users', [AdminController::class, 'allUsers'])->name('admin.users');
     // View All Vouchers
     Route::get('/admin/vouchers', [AdminController::class, 'allVouchers'])->name('admin.vouchers');
     Route::get('/voucher/{id}', [AdminController::class, 'showVoucher'])->name('voucher.show');

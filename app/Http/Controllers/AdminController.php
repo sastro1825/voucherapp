@@ -88,7 +88,7 @@ class AdminController extends Controller
         $request->validate([
             'username' => 'required|unique:users',
             'password' => 'required|min:6',
-            'whatsapp_number' => 'required|regex:/^([0-9\s\-\+\(\)]*)$/|min:10',
+            'whatsapp_number' => 'required|regex:/^([0-9\s\-\+$$  $$]*)$/|min:10',
         ]);
         User::create([
             'username' => $request->username,
@@ -150,7 +150,7 @@ class AdminController extends Controller
         $whatsappUrl = "https://wa.me/?text=" . urlencode("Your Voucher Details: {$publicUrl}");
 
         // Redirect kembali dengan pesan sukses dan URL untuk membuka tab baru
-        return redirect()->back()->with('success', 'Link voucher can be created')->with('public_url', $publicUrl);
+        return redirect()->back()->with('success', 'Voucher can be open')->with('public_url', $publicUrl);
     }
 
     public function showPublicVoucher($id)
@@ -260,5 +260,14 @@ class AdminController extends Controller
             Log::error('Failed to send WhatsApp message via WABLAS', ['error' => $errorMessage]);
             return redirect()->back()->with('error', 'Gagal mengirim link voucher ke WhatsApp: ' . $errorMessage);
         }
+    }
+
+    public function allUsers()
+    {
+        if (!Auth::check() || Auth::user()->role !== 'admin') {
+            return redirect('/login');
+        }
+        $users = User::select('username', 'whatsapp_number')->get();
+        return view('admin.users', compact('users'));
     }
 }

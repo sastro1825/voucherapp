@@ -38,7 +38,7 @@
                     <span class="text-red-500 text-sm">{{ $message }}</span>
                 @enderror
             </div>
-            <div class="flex space-x-4">
+            <div class="flex space-x-6">
                 <button type="submit" class="bg-green-600 text-white py-2 px-4 rounded hover:bg-green-700 transition">
                     Update Voucher
                 </button>

@@ -19,6 +19,9 @@
     <li>
         <a href="{{ route('admin.vouchers') }}" class="block p-2 bg-gray-200 dark:bg-gray-700 rounded">View All Vouchers</a>
     </li>
+    <li>
+        <a href="{{ route('admin.users') }}" class="block p-2 hover:bg-gray-200 dark:hover:bg-gray-700 rounded">View All Users</a>
+    </li>
     <li x-data="{ showSetting: false }">
         <button @click="showSetting = !showSetting" class="block p-2 hover:bg-gray-200 dark:hover:bg-gray-700 rounded w-full text-left flex justify-between items-center">
             Setting
@@ -45,6 +48,17 @@
 
 @section('content')
     <h1 class="text-3xl font-bold mb-6">All Vouchers</h1>
+
+    <!-- Notification -->
+    @if (session('success'))
+        <div id="notification"></div>
+    @endif
+    @if (session('error'))
+        <div id="notification"></div>
+    @endif
+    @if (session('warning'))
+        <div id="notification"></div>
+    @endif
 
     <!-- Filter -->
     <div class="mb-6">
@@ -163,6 +177,13 @@
         </script>
     @endif
     <script>
+        // Define messages from Blade session
+        const notificationMessages = {
+            success: @json(session('success')),
+            error: @json(session('error')),
+            warning: @json(session('warning'))
+        };
+
         const modal = document.getElementById('whatsappModal');
         const closeModalBtn = document.getElementById('closeModal');
         const form = document.getElementById('whatsappForm');
@@ -203,5 +224,25 @@
                 form.reset();
             }
         });
+
+        // Auto-refresh after 3 seconds for specific messages
+        const specificMessages = [
+            'Voucher can be open',
+            'Voucher updated successfully!',
+            'Voucher deleted successfully!',
+            'Merchant dengan username tersebut tidak ditemukan.',
+            'Nomor WhatsApp merchant tidak ditemukan.',
+            'Voucher ini sudah pernah dikirim ke merchant'
+        ];
+
+        const notification = document.getElementById('notification');
+        if (notification) {
+            const currentMessage = notificationMessages.success || notificationMessages.error || notificationMessages.warning;
+            if (currentMessage && specificMessages.some(msg => currentMessage.includes(msg))) {
+                setTimeout(() => {
+                    window.location.reload();
+                }, 3000);
+            }
+        }
     </script>
 @endsection

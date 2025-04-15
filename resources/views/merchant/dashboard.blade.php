@@ -29,6 +29,11 @@
 
 @section('content')
     <!-- Notification -->
+    @if (session('success'))
+        <div id="registration-notification">
+            {{ session('success') }}
+        </div>
+    @endif
     @if (session('notification'))
         <div class="mb-6 p-4 rounded {{ session('notification.type') === 'success' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800' }}" id="notification">
             {{ session('notification.message') }}
@@ -46,6 +51,9 @@
             @csrf
             <input type="text" name="voucher_id" id="voucher_id" class="w-full p-2 border rounded dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100" 
                    placeholder="Enter voucher ID or scan barcode" required>
+            @error('voucher_id')
+                <span class="text-red-500 text-sm">{{ $message }}</span>
+            @enderror
             <button type="submit" class="mt-2 bg-green-600 text-white py-2 px-4 rounded hover:bg-green-700">
                 Redeem
             </button>
@@ -107,9 +115,10 @@
             startScanButton.classList.remove('hidden');
         }
 
-        // Auto-refresh after 3 seconds if notification exists
+        // Auto-refresh after 3 seconds for both notifications
         const notification = document.getElementById('notification');
-        if (notification) {
+        const registrationNotification = document.getElementById('registration-notification');
+        if (notification || registrationNotification) {
             setTimeout(() => {
                 window.location.reload();
             }, 3000);
