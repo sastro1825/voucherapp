@@ -42,7 +42,7 @@ class AuthenticatedSessionController extends Controller
         Log::info('Session regenerated, user_id: ' . Auth::id() . ', role: ' . $user->role);
 
         if ($user->role === 'admin') {
-            return redirect()->route('admin.dashboard');
+            return redirect()->route('admin.create-voucher'); // Ubah redirect ke Create Voucher
         } elseif ($user->role === 'merchant') {
             return redirect()->route('merchant.dashboard');
         }
