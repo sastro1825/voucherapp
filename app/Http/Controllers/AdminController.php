@@ -18,8 +18,17 @@ class AdminController extends Controller
         if (!Auth::check() || Auth::user()->role !== 'admin') {
             return redirect('/login');
         }
+        return view('admin.dashboard');
+    }
+
+    // Menampilkan form untuk update company name
+    public function showUpdateCompanyForm()
+    {
+        if (!Auth::check() || Auth::user()->role !== 'admin') {
+            return redirect('/login');
+        }
         $company = Setting::where('key_name', 'company_name')->first();
-        return view('admin.dashboard', compact('company'));
+        return view('admin.update-company', compact('company'));
     }
 
     public function updateCompany(Request $request)
@@ -32,7 +41,16 @@ class AdminController extends Controller
             ['key_name' => 'company_name'],
             ['value' => $request->company_name]
         );
-        return redirect()->back()->with('success', 'Company name updated successfully!');
+        return redirect()->route('admin.update-company')->with('success', 'Company name updated successfully!');
+    }
+
+    // Menampilkan form untuk create voucher
+    public function showCreateVoucherForm()
+    {
+        if (!Auth::check() || Auth::user()->role !== 'admin') {
+            return redirect('/login');
+        }
+        return view('admin.create-voucher');
     }
 
     public function createVoucher(Request $request)
@@ -50,7 +68,16 @@ class AdminController extends Controller
             'expiration_date' => now()->addYear(),
             'status' => 'Active',
         ]);
-        return redirect()->back()->with('success', 'Voucher created successfully!');
+        return redirect()->route('admin.create-voucher')->with('success', 'Voucher created successfully!');
+    }
+
+    // Menampilkan form untuk create merchant
+    public function showCreateMerchantForm()
+    {
+        if (!Auth::check() || Auth::user()->role !== 'admin') {
+            return redirect('/login');
+        }
+        return view('admin.create-merchant');
     }
 
     public function createMerchant(Request $request)
@@ -69,7 +96,7 @@ class AdminController extends Controller
             'whatsapp_number' => $request->whatsapp_number,
             'role' => 'merchant',
         ]);
-        return redirect()->back()->with('success', 'Merchant created successfully!');
+        return redirect()->route('admin.create-merchant')->with('success', 'Merchant created successfully!');
     }
 
     public function allVouchers(Request $request)

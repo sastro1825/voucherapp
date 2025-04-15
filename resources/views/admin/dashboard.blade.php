@@ -11,22 +11,29 @@
 
 @section('sidebar-menu')
     <li>
-        <a href="#" @click="$refs.updateCompany.classList.remove('hidden'); $refs.createVoucher.classList.add('hidden'); $refs.createMerchant.classList.add('hidden')" 
-           class="block p-2 hover:bg-gray-200 dark:hover:bg-gray-700 rounded">Update Company Name</a>
+        <a href="{{ route('admin.create-voucher') }}" class="block p-2 hover:bg-gray-200 dark:hover:bg-gray-700 rounded">Create Voucher</a>
     </li>
     <li>
-        <a href="#" @click="$refs.updateCompany.classList.add('hidden'); $refs.createVoucher.classList.remove('hidden'); $refs.createMerchant.classList.add('hidden')" 
-           class="block p-2 hover:bg-gray-200 dark:hover:bg-gray-700 rounded">Create Voucher</a>
-    </li>
-    <li>
-        <a href="#" @click="$refs.updateCompany.classList.add('hidden'); $refs.createVoucher.classList.add('hidden'); $refs.createMerchant.classList.remove('hidden')" 
-           class="block p-2 hover:bg-gray-200 dark:hover:bg-gray-700 rounded">Create Merchant</a>
+        <a href="{{ route('admin.create-merchant') }}" class="block p-2 hover:bg-gray-200 dark:hover:bg-gray-700 rounded">Create Merchant</a>
     </li>
     <li>
         <a href="{{ route('admin.vouchers') }}" class="block p-2 hover:bg-gray-200 dark:hover:bg-gray-700 rounded">View All Vouchers</a>
     </li>
-    <li>
-        <a href="{{ route('profile') }}" class="block p-2 hover:bg-gray-200 dark:hover:bg-gray-700 rounded">Profil</a>
+    <li x-data="{ showSetting: false }">
+        <button @click="showSetting = !showSetting" class="block p-2 hover:bg-gray-200 dark:hover:bg-gray-700 rounded w-full text-left flex justify-between items-center">
+            Setting
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+            </svg>
+        </button>
+        <ul x-show="showSetting" class="pl-4">
+            <li>
+                <a href="{{ route('profile') }}" class="block p-2 hover:bg-gray-200 dark:hover:bg-gray-700 rounded">Profil</a>
+            </li>
+            <li>
+                <a href="{{ route('admin.update-company') }}" class="block p-2 hover:bg-gray-200 dark:hover:bg-gray-700 rounded">Update Company Name</a>
+            </li>
+        </ul>
     </li>
     <li>
         <form method="POST" action="{{ route('logout') }}">
@@ -38,48 +45,4 @@
 
 @section('content')
     <h1 class="text-3xl font-bold mb-6">Welcome, {{ Auth::user()->username }}!</h1>
-
-    <!-- Update Company Name -->
-    <div x-ref="updateCompany" class="mb-6 bg-white dark:bg-gray-800 p-6 rounded shadow">
-        <h2 class="text-xl font-semibold mb-2">Update Company Name</h2>
-        <form method="POST" action="{{ route('admin.update-company') }}" onsubmit="return confirm('Apakah Anda yakin ingin memperbarui nama perusahaan?')">
-            @csrf
-            <input type="text" name="company_name" value="{{ $company->value ?? '' }}"
-                   class="w-full p-2 border rounded dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100" 
-                   placeholder="Enter company name" required>
-            <button type="submit" class="mt-2 bg-blue-600 text-white py-2 px-4 rounded hover:bg-blue-700">
-                Update
-            </button>
-        </form>
-    </div>
-
-    <!-- Create Voucher -->
-    <div x-ref="createVoucher" class="mb-6 bg-white dark:bg-gray-800 p-6 rounded shadow hidden">
-        <h2 class="text-xl font-semibold mb-2">Create Voucher</h2>
-        <form method="POST" action="{{ route('admin.create-voucher') }}" onsubmit="return confirm('Apakah Anda yakin ingin membuat voucher ini?')">
-            @csrf
-            <input type="number" name="value" class="w-full p-2 border rounded dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100" 
-                   placeholder="Voucher value" required>
-            <button type="submit" class="mt-2 bg-green-600 text-white py-2 px-4 rounded hover:bg-green-700">
-                Create Voucher
-            </button>
-        </form>
-    </div>
-
-    <!-- Create Merchant -->
-    <div x-ref="createMerchant" class="mb-6 bg-white dark:bg-gray-800 p-6 rounded shadow hidden">
-        <h2 class="text-xl font-semibold mb-2">Create Merchant</h2>
-        <form method="POST" action="{{ route('admin.create-merchant') }}" onsubmit="return confirm('Apakah Anda yakin ingin membuat merchant ini?')">
-            @csrf
-            <input type="text" name="username" class="w-full p-2 border rounded mb-2 dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100" 
-                   placeholder="Username" required>
-            <input type="password" name="password" class="w-full p-2 border rounded mb-2 dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100" 
-                   placeholder="Password" required>
-            <input type="text" name="whatsapp_number" class="w-full p-2 border rounded mb-2 dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100" 
-                   placeholder="WhatsApp Number (e.g., 6281234567890)" required>
-            <button type="submit" class="mt-2 bg-purple-600 text-white py-2 px-4 rounded hover:bg-purple-700">
-                Create Merchant
-            </button>
-        </form>
-    </div>
 @endsection

@@ -5,6 +5,11 @@ use App\Http\Controllers\MerchantController;
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
 use Illuminate\Support\Facades\Route;
 
+// Redirect root (/) ke halaman login
+Route::get('/', function () {
+    return redirect()->route('login');
+});
+
 // Rute Publik (tanpa middleware auth)
 Route::get('/login', [AuthenticatedSessionController::class, 'create'])->name('login');
 // Terapkan rate limiting: maksimal 5 percobaan per menit
@@ -28,15 +33,22 @@ Route::get('/voucher/public/{id}', [AdminController::class, 'showPublicVoucher']
 Route::middleware(['auth'])->group(function () {
     // Rute Admin
     Route::get('/admin/dashboard', [AdminController::class, 'dashboard'])->name('admin.dashboard');
-    Route::post('/admin/update-company', [AdminController::class, 'updateCompany'])->name('admin.update-company');
-    Route::post('/admin/create-voucher', [AdminController::class, 'createVoucher'])->name('admin.create-voucher');
-    Route::post('/admin/create-merchant', [AdminController::class, 'createMerchant'])->name('admin.create-merchant');
+    // Update Company Name
+    Route::get('/admin/update-company', [AdminController::class, 'showUpdateCompanyForm'])->name('admin.update-company');
+    Route::post('/admin/update-company', [AdminController::class, 'updateCompany'])->name('admin.update-company.submit');
+    // Create Voucher
+    Route::get('/admin/create-voucher', [AdminController::class, 'showCreateVoucherForm'])->name('admin.create-voucher');
+    Route::post('/admin/create-voucher', [AdminController::class, 'createVoucher'])->name('admin.create-voucher.submit');
+    // Create Merchant
+    Route::get('/admin/create-merchant', [AdminController::class, 'showCreateMerchantForm'])->name('admin.create-merchant');
+    Route::post('/admin/create-merchant', [AdminController::class, 'createMerchant'])->name('admin.create-merchant.submit');
+    // View All Vouchers
     Route::get('/admin/vouchers', [AdminController::class, 'allVouchers'])->name('admin.vouchers');
     Route::get('/voucher/{id}', [AdminController::class, 'showVoucher'])->name('voucher.show');
     Route::get('/voucher/{id}/send', [AdminController::class, 'sendVoucher'])->name('voucher.send');
     Route::match(['get', 'post'], '/voucher/{id}/edit', [AdminController::class, 'editVoucher'])->name('voucher.edit');
     Route::get('/voucher/{id}/delete', [AdminController::class, 'deleteVoucher'])->name('voucher.delete');
-    // Rute baru untuk mengirim link voucher ke WhatsApp
+    // Rute untuk mengirim link voucher ke WhatsApp
     Route::get('/voucher/{voucherId}/send-to-merchant/{username}', [AdminController::class, 'sendVoucherLinkToMerchant'])->name('voucher.send-to-merchant');
 
     // Rute Merchant

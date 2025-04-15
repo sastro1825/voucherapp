@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'Profile')
+@section('title', 'Update Company Name')
 
 @section('sidebar-title')
     <div class="flex flex-col items-center mb-4">
@@ -28,10 +28,10 @@
         </button>
         <ul x-show="showSetting" class="pl-4">
             <li>
-                <a href="{{ route('profile') }}" class="block p-2 bg-gray-200 dark:bg-gray-700 rounded">Profil</a>
+                <a href="{{ route('profile') }}" class="block p-2 hover:bg-gray-200 dark:hover:bg-gray-700 rounded">Profil</a>
             </li>
             <li>
-                <a href="{{ route('admin.update-company') }}" class="block p-2 hover:bg-gray-200 dark:hover:bg-gray-700 rounded">Update Company Name</a>
+                <a href="{{ route('admin.update-company') }}" class="block p-2 bg-gray-200 dark:bg-gray-700 rounded">Update Company Name</a>
             </li>
         </ul>
     </li>
@@ -45,7 +45,7 @@
 
 @section('content')
     <div class="mb-6 bg-white dark:bg-gray-800 p-6 rounded shadow">
-        <h2 class="text-2xl font-bold mb-4">Profil {{ auth()->user()->role === 'admin' ? 'Admin' : 'Merchant' }}</h2>
+        <h2 class="text-2xl font-bold mb-4">Update Company Name</h2>
         @if (session('success'))
             <div class="bg-green-100 text-green-700 p-4 rounded mb-4">
                 {{ session('success') }}
@@ -56,32 +56,16 @@
                 {{ session('error') }}
             </div>
         @endif
-        <form method="POST" action="{{ route('profile.update') }}">
+        <form method="POST" action="{{ route('admin.update-company.submit') }}" onsubmit="return confirm('Apakah Anda yakin ingin memperbarui nama perusahaan?')">
             @csrf
-            <div class="mb-4">
-                <label for="whatsapp_number" class="block text-sm font-medium text-gray-700 dark:text-gray-300">WhatsApp Number</label>
-                <input type="text" name="whatsapp_number" id="whatsapp_number" value="{{ old('whatsapp_number', auth()->user()->whatsapp_number) }}"
-                       class="mt-1 p-2 w-full border rounded dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100" 
-                       placeholder="WhatsApp Number (e.g., 6281234567890)" required>
-                @error('whatsapp_number')
-                    <span class="text-red-500 text-sm">{{ $message }}</span>
-                @enderror
-            </div>
-            <div class="mb-4">
-                <label for="password" class="block text-sm font-medium text-gray-700 dark:text-gray-300">New Password (optional)</label>
-                <input type="password" name="password" id="password"
-                       class="mt-1 p-2 w-full border rounded dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100">
-                @error('password')
-                    <span class="text-red-500 text-sm">{{ $message }}</span>
-                @enderror
-            </div>
-            <div class="mb-4">
-                <label for="password_confirmation" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Confirm New Password</label>
-                <input type="password" name="password_confirmation" id="password_confirmation"
-                       class="mt-1 p-2 w-full border rounded dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100">
-            </div>
-            <button type="submit" class="bg-blue-600 text-white py-2 px-4 rounded hover:bg-blue-700">
-                Update Profile
+            <input type="text" name="company_name" value="{{ $company->value ?? '' }}"
+                   class="w-full p-2 border rounded dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100" 
+                   placeholder="Enter company name" required>
+            @error('company_name')
+                <span class="text-red-500 text-sm">{{ $message }}</span>
+            @enderror
+            <button type="submit" class="mt-2 bg-blue-600 text-white py-2 px-4 rounded hover:bg-blue-700">
+                Update
             </button>
         </form>
     </div>
