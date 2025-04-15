@@ -44,17 +44,6 @@
 @endsection
 
 @section('content')
-    @if (session('success'))
-        <div class="mb-4 p-4 rounded bg-green-100 text-green-700 notification">
-            {{ session('success') }}
-        </div>
-    @endif
-    @if (session('error'))
-        <div class="mb-4 p-4 rounded bg-red-100 text-red-700 notification">
-            {{ session('error') }}
-        </div>
-    @endif
-
     <h1 class="text-3xl font-bold mb-6">All Vouchers</h1>
 
     <!-- Filter -->
@@ -103,10 +92,10 @@
                                    class="bg-green-600 text-white px-3 py-1.5 rounded hover:bg-green-700 transition text-sm font-medium">
                                     Open
                                 </a>
-                                <button @click="openEditModal('{{ $voucher->id }}', '{{ $voucher->value }}', '{{ $voucher->expiration_date }}')" 
-                                        class="bg-yellow-600 text-white px-3 py-1.5 rounded hover:bg-yellow-700 transition text-sm font-medium">
+                                <a href="{{ route('voucher.edit', $voucher->id) }}" 
+                                   class="bg-yellow-600 text-white px-3 py-1.5 rounded hover:bg-yellow-700 transition text-sm font-medium">
                                     Edit
-                                </button>
+                                </a>
                                 <form action="{{ route('voucher.delete', $voucher->id) }}" method="POST" 
                                       onsubmit="return confirm('Apakah Anda yakin ingin menghapus voucher ini?')">
                                     @csrf
@@ -135,40 +124,6 @@
                 @endforeach
             </tbody>
         </table>
-    </div>
-
-    <!-- Modal untuk Edit Voucher -->
-    <div x-data="{ showModal: false, voucherId: '', voucherValue: '', expirationDate: '' }" x-show="showModal" 
-         class="fixed inset-0 bg-gray-600 bg-opacity-50 flex items-center justify-center z-50">
-        <div class="bg-white dark:bg-gray-800 p-6 rounded shadow-lg w-full max-w-md">
-            <h2 class="text-xl font-bold mb-4 text-gray-900 dark:text-gray-100">Edit Voucher</h2>
-            <form method="POST" action="{{ route('voucher.update', ['id' => ':voucherId']) }}" @submit="showModal = false">
-                @csrf
-                @method('PUT')
-                <input type="hidden" name="voucher_id" x-model="voucherId">
-                <div class="mb-4">
-                    <label for="value" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Voucher Value</label>
-                    <input type="number" name="value" id="value" x-model="voucherValue" 
-                           class="mt-1 p-2 w-full border rounded dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100" required>
-                    @error('value')
-                        <span class="text-red-500 text-sm">{{ $message }}</span>
-                    @enderror
-                </div>
-                <div class="mb-4">
-                    <label for="expiration_date" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Expiration Date</label>
-                    <input type="date" name="expiration_date" id="expiration_date" x-model="expirationDate" 
-                           class="mt-1 p-2 w-full border rounded dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100" required>
-                    @error('expiration_date')
-                        <span class="text-red-500 text-sm">{{ $message }}</span>
-                    @enderror
-                </div>
-                <div class="flex justify-end">
-                    <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition">
-                        Update
-                    </button>
-                </div>
-            </form>
-        </div>
     </div>
 
     <!-- Modal untuk Input Username -->
@@ -208,35 +163,6 @@
         </script>
     @endif
     <script>
-        // Auto-dismiss notifikasi setelah 3 detik
-        document.addEventListener('DOMContentLoaded', function () {
-            const notifications = document.querySelectorAll('.notification');
-            notifications.forEach(notification => {
-                setTimeout(() => {
-                    notification.style.opacity = '0';
-                    notification.style.transition = 'opacity 0.5s ease';
-                    setTimeout(() => notification.remove(), 500);
-                }, 3000);
-            });
-        });
-
-        // Script untuk modal Edit Voucher
-        window.openEditModal = function (voucherId, voucherValue, expirationDate) {
-            const modalData = Alpine.$data(document.querySelector('[x-data]'));
-            modalData.voucherId = voucherId;
-            modalData.voucherValue = voucherValue;
-            modalData.expirationDate = expirationDate;
-            modalData.showModal = true;
-
-            // Update form action dengan voucherId
-            const form = document.querySelector('#editVoucherForm');
-            if (form) {
-                const baseUrl = '{{ route("voucher.update", ["id" => ":voucherId"]) }}';
-                form.action = baseUrl.replace(':voucherId', voucherId);
-            }
-        };
-
-        // Script untuk modal WhatsApp
         const modal = document.getElementById('whatsappModal');
         const closeModalBtn = document.getElementById('closeModal');
         const form = document.getElementById('whatsappForm');
