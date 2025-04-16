@@ -49,23 +49,38 @@
 @section('content')
     <h1 class="text-3xl font-bold mb-6">All Users</h1>
 
+    <!-- Search Form -->
+    <div class="mb-6">
+        <form action="{{ route('admin.users') }}" method="GET" class="flex items-center space-x-6">
+            <input type="text" name="search" value="{{ $search ?? '' }}" placeholder="Search by username..." class="w-full max-w-md p-2 border rounded dark:bg-gray-700 dark:text-gray-200 dark:border-gray-600 focus:outline-none focus:ring-2 focus:ring-indigo-500 transition duration-150 mr-4">
+            <button type="submit" class="px-4 py-2 bg-indigo-600 text-white rounded-lg shadow-sm hover:bg-indigo-700 dark:bg-indigo-500 dark:hover:bg-indigo-600 focus:outline-none focus:ring-2 focus:ring-indigo-500 transition duration-150">Search</button>
+            @if ($search)
+                <a href="{{ route('admin.users') }}" class="px-4 py-2 bg-red-600 text-white rounded-lg shadow-sm hover:bg-red-700 dark:bg-red-500 dark:hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-red-500 transition duration-150">Clear</a>
+            @endif
+        </form>
+    </div>
+
     <!-- Table -->
     <div class="bg-white dark:bg-gray-800 p-6 rounded shadow overflow-x-auto">
-        <table class="w-full border-collapse text-sm">
-            <thead>
-                <tr class="bg-gray-200 dark:bg-gray-700">
-                    <th class="p-2 border dark:border-gray-600">Username</th>
-                    <th class="p-2 border dark:border-gray-600">Nomor WA</th>
-                </tr>
-            </thead>
-            <tbody>
-                @foreach ($users as $user)
-                    <tr class="border-b dark:border-gray-600">
-                        <td class="p-2 text-center">{{ $user->username }}</td>
-                        <td class="p-2 text-center">{{ $user->whatsapp_number ?? '-' }}</td>
+        @if ($users->isEmpty())
+            <p class="text-center text-gray-500 dark:text-gray-400">No users found.</p>
+        @else
+            <table class="w-full border-collapse text-sm">
+                <thead>
+                    <tr class="bg-gray-200 dark:bg-gray-700">
+                        <th class="p-2 border dark:border-gray-600">Username</th>
+                        <th class="p-2 border dark:border-gray-600">Nomor WA</th>
                     </tr>
-                @endforeach
-            </tbody>
-        </table>
+                </thead>
+                <tbody>
+                    @foreach ($users as $user)
+                        <tr class="border-b dark:border-gray-600">
+                            <td class="p-2 text-center">{{ $user->username }}</td>
+                            <td class="p-2 text-center">{{ $user->whatsapp_number ?? '-' }}</td>
+                        </tr>
+                    @endforeach
+                </tbody>
+            </table>
+        @endif
     </div>
 @endsection

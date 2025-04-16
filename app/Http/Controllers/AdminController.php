@@ -21,7 +21,6 @@ class AdminController extends Controller
         return view('admin.dashboard');
     }
 
-    // Menampilkan form untuk update company name
     public function showUpdateCompanyForm()
     {
         if (!Auth::check() || Auth::user()->role !== 'admin') {
@@ -44,7 +43,6 @@ class AdminController extends Controller
         return redirect()->route('admin.update-company')->with('success', 'Company name updated successfully!');
     }
 
-    // Menampilkan form untuk create voucher
     public function showCreateVoucherForm()
     {
         if (!Auth::check() || Auth::user()->role !== 'admin') {
@@ -71,7 +69,6 @@ class AdminController extends Controller
         return redirect()->route('admin.create-voucher')->with('success', 'Voucher created successfully!');
     }
 
-    // Menampilkan form untuk create merchant
     public function showCreateMerchantForm()
     {
         if (!Auth::check() || Auth::user()->role !== 'admin') {
@@ -118,7 +115,6 @@ class AdminController extends Controller
                 $query->where('expiration_date', '<', now())->where('status', '!=', 'Redeemed');
                 break;
             default:
-                // Tidak ada filter tambahan
                 break;
         }
 
@@ -142,15 +138,9 @@ class AdminController extends Controller
             return redirect('/login');
         }
         $voucher = Voucher::findOrFail($id);
-
-        // URL publik untuk voucher
         $publicUrl = url('/voucher/public/' . $voucher->id);
-
-        // Simulasi pengiriman ke WhatsApp dengan link publik
         $whatsappUrl = "https://wa.me/?text=" . urlencode("Your Voucher Details: {$publicUrl}");
-
-        // Redirect kembali dengan pesan sukses dan URL untuk membuka tab baru
-        return redirect()->back()->with('success', 'Voucher can be open')->with('public_url', $publicUrl);
+        return redirect()->back()->with('success', 'Voucher can be opened')->with('public_url', $publicUrl);
     }
 
     public function showPublicVoucher($id)
@@ -189,40 +179,26 @@ class AdminController extends Controller
         if (!Auth::check() || Auth::user()->role !== 'admin') {
             return redirect('/login');
         }
-
-        // Ambil data voucher berdasarkan ID
         $voucher = Voucher::findOrFail($voucherId);
         $voucherLink = url("/voucher/public/{$voucher->id}");
-
-        // Ambil nomor WhatsApp merchant berdasarkan username
         $merchant = User::where('username', $username)->where('role', 'merchant')->first();
         if (!$merchant) {
             return redirect()->back()->with('error', 'Merchant dengan username tersebut tidak ditemukan.');
         }
-
         $whatsappNumber = $merchant->whatsapp_number;
         if (!$whatsappNumber) {
             return redirect()->back()->with('error', 'Nomor WhatsApp merchant tidak ditemukan.');
         }
-
-        // Cek apakah voucher sudah pernah dikirim ke merchant ini
         if ($voucher->sent_to === $username) {
             return redirect()->back()->with('warning', "Voucher ini sudah pernah dikirim ke merchant {$username}.");
         }
-
-        // Pastikan nomor WhatsApp dalam format internasional (contoh: 6281234567890)
         if (!str_starts_with($whatsappNumber, '62')) {
             $whatsappNumber = '62' . ltrim($whatsappNumber, '0');
         }
-
-        // Buat pesan yang akan dikirim
         $message = "Halo {$merchant->username},\nBerikut adalah link voucher yang dapat Anda gunakan:\n{$voucherLink}\nTerima kasih!";
-
-        // Kirim pesan menggunakan WABLAS API
         $token = env('WABLAS_API_TOKEN');
         $secretKey = env('WABLAS_SECRET_KEY');
         $authHeader = $secretKey ? "$token.$secretKey" : $token;
-
         $payload = [
             "data" => [
                 [
@@ -232,20 +208,14 @@ class AdminController extends Controller
                 ]
             ]
         ];
-
         $response = Http::withHeaders([
             "Authorization" => $authHeader,
             "Content-Type" => "application/json",
         ])->post(env('WABLAS_API_URL'), $payload);
-
-        // Log response untuk debugging
         Log::info('WABLAS API response', ['response' => $response->json()]);
-
-        // Cek apakah pengiriman berhasil
         if ($response->successful()) {
             $responseData = $response->json();
             if (isset($responseData['status']) && $responseData['status'] === 'success') {
-                // Catat bahwa voucher telah dikirim ke merchant ini
                 $voucher->update(['sent_to' => $username]);
                 return redirect()->back()->with('success', 'Link voucher berhasil dikirim ke WhatsApp merchant.');
             } elseif (isset($responseData['message']) && str_contains($responseData['message'], 'pending')) {
@@ -262,12 +232,17 @@ class AdminController extends Controller
         }
     }
 
-    public function allUsers()
+    public function allUsers(Request $request)
     {
         if (!Auth::check() || Auth::user()->role !== 'admin') {
             return redirect('/login');
         }
-        $users = User::select('username', 'whatsapp_number')->get();
-        return view('admin.users', compact('users'));
+        $search = $request->query('search');
+        $query = User::select('username', 'whatsapp_number');
+        if ($search) {
+            $query->where('username', 'like', '%' . $search . '%');
+        }
+        $users = $query->get();
+        return view('admin.users', compact('users', 'search'));
     }
 }
