@@ -85,7 +85,7 @@
                         <th class="p-2 border dark:border-gray-600">Nomor WA</th>
                         <th class="p-2 border dark:border-gray-600">Role</th>
                         <th class="p-2 border dark:border-gray-600">Information</th>
-                        <th class="p-2 border dark:border-gray-600">Actions</th>
+                        <th class="p-2 border dark:border-gap-600">Actions</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -95,10 +95,10 @@
                             <td class="p-2 text-center">{{ $user->whatsapp_number ?? '-' }}</td>
                             <td class="p-2 text-center">{{ ucfirst($user->role) }}</td>
                             <td class="p-2 text-center">{{ $user->information ?? '-' }}</td>
-                            <td class="p-2 text-center">
-                                <div class="flex items-center justify-center space-x-2">
+                            <td class="p-2">
+                                <div class="flex items-center justify-start space-x-2">
                                     <a href="{{ route('admin.user.edit', $user->id) }}" 
-                                       class="inline-flex items-center w-24 px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg shadow-sm hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-150">
+                                       class="ml-4 inline-flex items-center w-24 px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg shadow-sm hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-150">
                                         <svg class="w-5 h-5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15.828a2 2 0 01-2.828 0l-1.414-1.414a2 2 0 010-2.828z"></path>
                                         </svg>
