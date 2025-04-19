@@ -9,6 +9,7 @@ use Illuminate\Http\Request;
 use SimpleSoftwareIO\QrCode\Facades\QrCode;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
 
 class AdminController extends Controller
@@ -84,13 +85,25 @@ class AdminController extends Controller
         }
         $request->validate([
             'username' => 'required|unique:users',
-            'password' => 'required|min:6',
-            'whatsapp_number' => 'required|regex:/^([0-9\s\-\+$$  $$]*)$/|min:10',
+            'password' => 'required|min:8|regex:/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/',
+            'whatsapp_number' => 'required|regex:/^([0-9\s\-\+\(\)]*)$/|min:10',
+            'information' => 'nullable|string',
+        ], [
+            'username.required' => 'Username harus diisi.',
+            'username.unique' => 'Username sudah digunakan.',
+            'password.required' => 'Password harus diisi.',
+            'password.min' => 'Password minimal 8 karakter.',
+            'password.regex' => 'Password harus mengandung huruf kecil, huruf besar, angka, dan karakter khusus (seperti @$!%*?&).',
+            'whatsapp_number.required' => 'Nomor WhatsApp harus diisi.',
+            'whatsapp_number.regex' => 'Nomor WhatsApp hanya boleh berisi angka, spasi, tanda minus, plus, atau tanda kurung.',
+            'whatsapp_number.min' => 'Nomor WhatsApp minimal 10 karakter.',
         ]);
+
         User::create([
             'username' => $request->username,
-            'password' => bcrypt($request->password),
+            'password' => Hash::make($request->password),
             'whatsapp_number' => $request->whatsapp_number,
+            'information' => $request->information,
             'role' => 'merchant',
         ]);
         return redirect()->route('admin.create-merchant')->with('success', 'Merchant created successfully!');
@@ -238,11 +251,59 @@ class AdminController extends Controller
             return redirect('/login');
         }
         $search = $request->query('search');
-        $query = User::select('username', 'whatsapp_number');
+        $query = User::select('id', 'username', 'whatsapp_number', 'information', 'role');
         if ($search) {
             $query->where('username', 'like', '%' . $search . '%');
         }
         $users = $query->get();
         return view('admin.users', compact('users', 'search'));
+    }
+
+    public function editUser(Request $request, $id)
+    {
+        if (!Auth::check() || Auth::user()->role !== 'admin') {
+            return redirect('/login');
+        }
+        $user = User::findOrFail($id);
+        if ($request->isMethod('post')) {
+            $request->validate([
+                'username' => 'required|unique:users,username,' . $id,
+                'whatsapp_number' => 'required|regex:/^([0-9\s\-\+\(\)]*)$/|min:10',
+                'information' => 'nullable|string',
+                'password' => 'nullable|min:8|regex:/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/',
+            ], [
+                'username.required' => 'Username harus diisi.',
+                'username.unique' => 'Username sudah digunakan.',
+                'whatsapp_number.required' => 'Nomor WhatsApp harus diisi.',
+                'whatsapp_number.regex' => 'Nomor WhatsApp hanya boleh berisi angka, spasi, tanda minus, plus, atau tanda kurung.',
+                'whatsapp_number.min' => 'Nomor WhatsApp minimal 10 karakter.',
+                'password.min' => 'Password minimal 8 karakter.',
+                'password.regex' => 'Password harus mengandung huruf kecil, huruf besar, angka, dan karakter khusus (seperti @$!%*?&).',
+            ]);
+
+            $user->username = $request->username;
+            $user->whatsapp_number = $request->whatsapp_number;
+            $user->information = $request->information;
+            if ($request->filled('password')) {
+                $user->password = Hash::make($request->password);
+            }
+            $user->save();
+
+            return redirect()->route('admin.users')->with('success', 'User updated successfully!');
+        }
+        return view('admin.edit-user', compact('user'));
+    }
+
+    public function deleteUser($id)
+    {
+        if (!Auth::check() || Auth::user()->role !== 'admin') {
+            return redirect('/login');
+        }
+        $user = User::findOrFail($id);
+        if ($user->role === 'admin') {
+            return redirect()->back()->with('error', 'Cannot delete an admin user.');
+        }
+        $user->delete();
+        return redirect()->back()->with('success', 'User deleted successfully!');
     }
 }

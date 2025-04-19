@@ -44,6 +44,8 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/admin/create-merchant', [AdminController::class, 'createMerchant'])->name('admin.create-merchant.submit');
 
     Route::get('/admin/users', [AdminController::class, 'allUsers'])->name('admin.users');
+    Route::match(['get', 'post'], '/admin/users/{id}/edit', [AdminController::class, 'editUser'])->name('admin.user.edit');
+    Route::delete('/admin/users/{id}/delete', [AdminController::class, 'deleteUser'])->name('admin.user.delete');
     // View All Vouchers
     Route::get('/admin/vouchers', [AdminController::class, 'allVouchers'])->name('admin.vouchers');
     Route::get('/voucher/{id}', [AdminController::class, 'showVoucher'])->name('voucher.show');
