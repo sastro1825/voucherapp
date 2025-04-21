@@ -129,7 +129,7 @@ class AuthenticatedSessionController extends Controller
         if (!str_starts_with($whatsappNumber, '62')) {
             $whatsappNumber = '62' . ltrim($whatsappNumber, '0');
         }
-        $message = "Reset your password here: $resetUrl";
+        $message = "Reset password anda pada: $resetUrl ,jika bukan anda abaikan pesan ini";
 
         $curl = curl_init();
         $token = env('WABLAS_API_TOKEN');
