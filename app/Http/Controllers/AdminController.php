@@ -187,31 +187,33 @@ class AdminController extends Controller
         return redirect()->back()->with('success', 'Voucher deleted successfully!');
     }
 
-    public function sendVoucherLinkToMerchant($voucherId, $username)
+    public function sendVoucherLinkToWhatsApp($voucherId, $whatsappNumber)
     {
         if (!Auth::check() || Auth::user()->role !== 'admin') {
             return redirect('/login');
         }
+
         $voucher = Voucher::findOrFail($voucherId);
         $voucherLink = url("/voucher/public/{$voucher->id}");
-        $merchant = User::where('username', $username)->where('role', 'merchant')->first();
-        if (!$merchant) {
-            return redirect()->back()->with('error', 'Merchant dengan username tersebut tidak ditemukan.');
+
+        if (!preg_match('/^([0-9\s\-\+\(\)]*)$/', $whatsappNumber) || strlen($whatsappNumber) < 10) {
+            return redirect()->back()->with('error', 'Nomor WhatsApp tidak valid.');
         }
-        $whatsappNumber = $merchant->whatsapp_number;
-        if (!$whatsappNumber) {
-            return redirect()->back()->with('error', 'Nomor WhatsApp merchant tidak ditemukan.');
+
+        if ($voucher->sent_to === $whatsappNumber) {
+            return redirect()->back()->with('warning', "Voucher ini sudah pernah dikirim ke nomor {$whatsappNumber}.");
         }
-        if ($voucher->sent_to === $username) {
-            return redirect()->back()->with('warning', "Voucher ini sudah pernah dikirim ke merchant {$username}.");
-        }
+
         if (!str_starts_with($whatsappNumber, '62')) {
             $whatsappNumber = '62' . ltrim($whatsappNumber, '0');
         }
-        $message = "Halo {$merchant->username},\nBerikut adalah link voucher yang dapat Anda gunakan:\n{$voucherLink}\nTerima kasih!";
+
+        $message = "Halo,\nBerikut adalah link voucher yang dapat Anda gunakan:\n{$voucherLink}\nTerima kasih!";
+
         $token = env('WABLAS_API_TOKEN');
         $secretKey = env('WABLAS_SECRET_KEY');
         $authHeader = $secretKey ? "$token.$secretKey" : $token;
+
         $payload = [
             "data" => [
                 [
@@ -221,23 +223,21 @@ class AdminController extends Controller
                 ]
             ]
         ];
+
         $response = Http::withHeaders([
             "Authorization" => $authHeader,
             "Content-Type" => "application/json",
         ])->post(env('WABLAS_API_URL'), $payload);
+
         Log::info('WABLAS API response', ['response' => $response->json()]);
+
         if ($response->successful()) {
-            $responseData = $response->json();
-            if (isset($responseData['status']) && $responseData['status'] === 'success') {
-                $voucher->update(['sent_to' => $username]);
-                return redirect()->back()->with('success', 'Link voucher berhasil dikirim ke WhatsApp merchant.');
-            } elseif (isset($responseData['message']) && str_contains($responseData['message'], 'pending')) {
-                return redirect()->back()->with('warning', 'Pesan sedang dalam antrian untuk dikirim ke WhatsApp. Silakan tunggu beberapa saat.');
-            } else {
-                $errorMessage = $responseData['message'] ?? 'Unknown error';
-                Log::error('Failed to send WhatsApp message via WABLAS', ['error' => $errorMessage]);
-                return redirect()->back()->with('error', 'Gagal mengirim link voucher ke WhatsApp: ' . $errorMessage);
-            }
+            $voucher->update([
+                'sent_to' => $whatsappNumber,
+                'sent_status' => 'sent', // Hanya gunakan satu status 'sent' untuk menandakan sudah dikirim
+                'sent_at' => now(),
+            ]);
+            return redirect()->back()->with('success', 'Link voucher berhasil dikirim ke WhatsApp.');
         } else {
             $errorMessage = $response->json()['message'] ?? 'Unknown error';
             Log::error('Failed to send WhatsApp message via WABLAS', ['error' => $errorMessage]);

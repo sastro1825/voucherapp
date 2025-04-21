@@ -20,7 +20,9 @@ class Voucher extends Model
         'created_date',
         'expiration_date',
         'status',
-        'sent_to', // Kolom baru untuk melacak pengiriman ke merchant
+        'sent_to',
+        'sent_status',
+        'sent_at',
         'redeemed_by',
         'redeemed_at',
     ];
@@ -28,7 +30,10 @@ class Voucher extends Model
     protected $dates = [
         'created_date',
         'expiration_date',
+        'sent_at',
         'redeemed_at',
+        'created_at',
+        'updated_at',
     ];
 
     public function redeemedVoucher()
