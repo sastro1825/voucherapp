@@ -51,18 +51,15 @@
 
     <!-- Notification -->
     @if (session('success'))
-        <div id="notification" class="bg-green-100 text-green-700 p-4 rounded mb-4">
-            {{ session('success') }}
+        <div id="notification">
         </div>
     @endif
     @if (session('error'))
-        <div id="notification" class="bg-red-100 text-red-700 p-4 rounded mb-4">
-            {{ session('error') }}
+        <div id="notification" >
         </div>
     @endif
     @if (session('warning'))
-        <div id="notification" class="bg-yellow-100 text-yellow-700 p-4 rounded mb-4">
-            {{ session('warning') }}
+        <div id="notification" >
         </div>
     @endif
 

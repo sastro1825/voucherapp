@@ -30,7 +30,13 @@
 @section('content')
     <h1 class="text-3xl font-bold mb-6">Redeemed Vouchers</h1>
     <div class="bg-white dark:bg-gray-800 p-6 rounded shadow">
-        <table class="w-full border-collapse">
+        <style>
+            .centered-table th,
+            .centered-table td {
+                text-align: center;
+            }
+        </style>
+        <table class="w-full border-collapse centered-table">
             <thead>
                 <tr class="bg-gray-200 dark:bg-gray-700">
                     <th class="p-2 border dark:border-gray-600">Voucher ID</th>

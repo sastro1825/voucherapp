@@ -50,14 +50,8 @@
     <div class="mb-6 bg-white dark:bg-gray-800 p-6 rounded shadow">
         <h2 class="text-2xl font-bold mb-4">Create Merchant</h2>
         @if (session('success'))
-            <div class="bg-green-100 text-green-700 p-4 rounded mb-4">
-                {{ session('success') }}
-            </div>
         @endif
         @if (session('error'))
-            <div class="bg-red-100 text-red-700 p-4 rounded mb-4">
-                {{ session('error') }}
-            </div>
         @endif
         <form method="POST" action="{{ route('admin.create-merchant.submit') }}" onsubmit="return confirm('Apakah Anda yakin ingin membuat merchant ini?')">
             @csrf
