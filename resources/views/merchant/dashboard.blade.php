@@ -42,6 +42,14 @@
 
     <h1 class="text-3xl font-bold mb-6">Welcome, {{ Auth::user()->username }}!</h1>
 
+    <!-- Saldo Voucher -->
+    <div class="mb-6 bg-white dark:bg-gray-800 p-6 rounded shadow">
+        <h2 class="text-xl font-semibold mb-2">Saldo Voucher Bulan Ini</h2>
+        <p class="text-lg">Limit Bulanan: 300.000</p>
+        <p class="text-lg">Voucher Digunakan: {{ $voucherUsedThisMonth }}</p>
+        <p class="text-lg font-bold">Sisa Saldo: {{ 300000 - $voucherUsedThisMonth }}</p>
+    </div>
+
     <!-- Redeem Voucher -->
     <div id="redeem-voucher" class="mb-6 bg-white dark:bg-gray-800 p-6 rounded shadow">
         <h2 class="text-xl font-semibold mb-2">Redeem Voucher</h2>

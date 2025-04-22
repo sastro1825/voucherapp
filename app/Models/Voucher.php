@@ -17,6 +17,7 @@ class Voucher extends Model
         'id',
         'company_name',
         'value',
+        'merchant_id',
         'created_date',
         'expiration_date',
         'status',
@@ -27,17 +28,23 @@ class Voucher extends Model
         'redeemed_at',
     ];
 
-    protected $dates = [
-        'created_date',
-        'expiration_date',
-        'sent_at',
-        'redeemed_at',
-        'created_at',
-        'updated_at',
+    // Cast kolom tanggal sebagai datetime
+    protected $casts = [
+        'created_date' => 'datetime',
+        'expiration_date' => 'datetime',
+        'sent_at' => 'datetime',
+        'redeemed_at' => 'datetime',
+        'created_at' => 'datetime',
+        'updated_at' => 'datetime',
     ];
 
     public function redeemedVoucher()
     {
         return $this->hasOne(RedeemedVoucher::class, 'voucher_id', 'id');
+    }
+
+    public function merchant()
+    {
+        return $this->belongsTo(User::class, 'merchant_id');
     }
 }

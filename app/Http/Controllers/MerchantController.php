@@ -14,7 +14,13 @@ class MerchantController extends Controller
         if (!Auth::check() || Auth::user()->role !== 'merchant') {
             return redirect('/login');
         }
-        return view('merchant.dashboard');
+
+        $currentMonth = now()->startOfMonth();
+        $voucherUsedThisMonth = Voucher::where('merchant_id', Auth::id())
+            ->where('created_date', '>=', $currentMonth)
+            ->sum('value');
+
+        return view('merchant.dashboard', compact('voucherUsedThisMonth'));
     }
 
     public function redeemVoucher(Request $request)

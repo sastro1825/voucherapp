@@ -49,7 +49,8 @@ class AdminController extends Controller
         if (!Auth::check() || Auth::user()->role !== 'admin') {
             return redirect('/login');
         }
-        return view('admin.create-voucher');
+        $merchants = User::where('role', 'merchant')->get();
+        return view('admin.create-voucher', compact('merchants'));
     }
 
     public function createVoucher(Request $request)
@@ -57,14 +58,34 @@ class AdminController extends Controller
         if (!Auth::check() || Auth::user()->role !== 'admin') {
             return redirect('/login');
         }
-        $request->validate(['value' => 'required']);
+
+        $request->validate([
+            'value' => 'required|numeric|min:1',
+            'merchant_id' => 'required|exists:users,id',
+        ]);
+
+        $merchant = User::findOrFail($request->merchant_id);
+
+        // Cek limit bulanan
+        $monthlyLimit = 300000;
+        $currentMonth = now()->startOfMonth();
+        $vouchersThisMonth = Voucher::where('merchant_id', $merchant->id)
+            ->where('created_date', '>=', $currentMonth)
+            ->sum('value');
+
+        $newVoucherValue = $request->value;
+        if ($vouchersThisMonth + $newVoucherValue > $monthlyLimit) {
+            return redirect()->back()->with('error', 'Limit voucher bulanan untuk merchant ini telah tercapai (maksimal 300.000 per bulan).');
+        }
+
         $voucher_id = 'VCH' . date('Ymd') . rand(100, 999);
         Voucher::create([
             'id' => $voucher_id,
             'company_name' => Setting::where('key_name', 'company_name')->first()->value ?? 'My Company',
-            'value' => $request->value,
+            'value' => $newVoucherValue,
+            'merchant_id' => $merchant->id,
             'created_date' => now(),
-            'expiration_date' => now()->addYear(),
+            'expiration_date' => now()->addMonths(3),
             'status' => 'Active',
         ]);
         return redirect()->route('admin.create-voucher')->with('success', 'Voucher created successfully!');
@@ -234,7 +255,7 @@ class AdminController extends Controller
         if ($response->successful()) {
             $voucher->update([
                 'sent_to' => $whatsappNumber,
-                'sent_status' => 'sent', // Hanya gunakan satu status 'sent' untuk menandakan sudah dikirim
+                'sent_status' => 'sent',
                 'sent_at' => now(),
             ]);
             return redirect()->back()->with('success', 'Link voucher berhasil dikirim ke WhatsApp.');

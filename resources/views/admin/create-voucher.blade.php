@@ -50,6 +50,9 @@
     <div class="mb-6 bg-white dark:bg-gray-800 p-6 rounded shadow">
         <h2 class="text-2xl font-bold mb-4">Create Voucher</h2>
         @if (session('success'))
+            <div class="bg-green-100 text-green-700 p-4 rounded mb-4">
+                {{ session('success') }}
+            </div>
         @endif
         @if (session('error'))
             <div class="bg-red-100 text-red-700 p-4 rounded mb-4">
@@ -58,11 +61,26 @@
         @endif
         <form method="POST" action="{{ route('admin.create-voucher.submit') }}" onsubmit="return confirm('Apakah Anda yakin ingin membuat voucher ini?')">
             @csrf
-            <input type="number" name="value" class="w-full p-2 border rounded dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100" 
-                   placeholder="Voucher value" required>
-            @error('value')
-                <span class="text-red-500 text-sm">{{ $message }}</span>
-            @enderror
+            <div class="mb-4">
+                <label for="merchant_id" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Pilih Merchant</label>
+                <select name="merchant_id" id="merchant_id" class="w-full p-2 border rounded dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100" required>
+                    <option value="">-- Pilih Merchant --</option>
+                    @foreach ($merchants as $merchant)
+                        <option value="{{ $merchant->id }}">{{ $merchant->username }}</option>
+                    @endforeach
+                </select>
+                @error('merchant_id')
+                    <span class="text-red-500 text-sm">{{ $message }}</span>
+                @enderror
+            </div>
+            <div class="mb-4">
+                <label for="value" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Nilai Voucher</label>
+                <input type="number" name="value" id="value" class="w-full p-2 border rounded dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100" 
+                       placeholder="Voucher value" required>
+                @error('value')
+                    <span class="text-red-500 text-sm">{{ $message }}</span>
+                @enderror
+            </div>
             <button type="submit" class="mt-2 bg-green-600 text-white py-2 px-4 rounded hover:bg-green-700">
                 Create Voucher
             </button>

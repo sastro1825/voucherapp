@@ -187,7 +187,8 @@
             <p><strong>ID:</strong> <span>{{ $voucher->id }}</span></p>
             <p><strong>Company:</strong> <span>{{ $voucher->company_name }}</span></p>
             <p><strong>Value:</strong> <span>{{ $voucher->value }}</span></p>
-            <p><strong>Expires:</strong> <span>{{ date('d M Y', strtotime($voucher->expiration_date)) }}</span></p>
+            <p><strong>Minimum Pembelanjaan:</strong> <span>{{ $voucher->value * 2 }}</span></p>
+            <p><strong>Expires:</strong> <span>{{ $voucher->expiration_date ? $voucher->expiration_date->format('d M Y') : 'N/A' }}</span></p>
             <p><strong>Status:</strong> <span>{{ $voucher->status }}</span></p>
             @if ($voucher->redeemed_by)
                 <p><strong>Redeemed By:</strong> <span>{{ $voucher->redeemed_by }}</span></p>
