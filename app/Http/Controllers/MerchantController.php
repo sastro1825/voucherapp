@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Voucher;
 use App\Models\RedeemedVoucher;
+use App\Models\MerchantBalance;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -15,12 +16,18 @@ class MerchantController extends Controller
             return redirect('/login');
         }
 
-        $currentMonth = now()->startOfMonth();
-        $voucherUsedThisMonth = Voucher::where('merchant_id', Auth::id())
-            ->where('created_date', '>=', $currentMonth)
-            ->sum('value');
+        $year = now()->year;
+        $month = now()->month;
 
-        return view('merchant.dashboard', compact('voucherUsedThisMonth'));
+        $balance = MerchantBalance::where('merchant_id', Auth::id())
+            ->where('year', $year)
+            ->where('month', $month)
+            ->first();
+
+        $voucherUsedThisMonth = $balance ? $balance->used_balance : 0;
+        $remainingBalance = $balance ? $balance->remaining_balance : 300000;
+
+        return view('merchant.dashboard', compact('voucherUsedThisMonth', 'remainingBalance'));
     }
 
     public function redeemVoucher(Request $request)

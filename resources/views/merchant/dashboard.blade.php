@@ -47,7 +47,7 @@
         <h2 class="text-xl font-semibold mb-2">Saldo Voucher Bulan Ini</h2>
         <p class="text-lg">Limit Bulanan: 300.000</p>
         <p class="text-lg">Voucher Digunakan: {{ $voucherUsedThisMonth }}</p>
-        <p class="text-lg font-bold">Sisa Saldo: {{ 300000 - $voucherUsedThisMonth }}</p>
+        <p class="text-lg font-bold">Sisa Saldo: {{ $remainingBalance }}</p>
     </div>
 
     <!-- Redeem Voucher -->

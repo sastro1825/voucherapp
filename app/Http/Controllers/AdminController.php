@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Setting;
 use App\Models\User;
 use App\Models\Voucher;
+use App\Models\MerchantBalance;
 use Illuminate\Http\Request;
 use SimpleSoftwareIO\QrCode\Facades\QrCode;
 use Illuminate\Support\Facades\Auth;
@@ -66,17 +67,35 @@ class AdminController extends Controller
 
         $merchant = User::findOrFail($request->merchant_id);
 
-        // Cek limit bulanan
-        $monthlyLimit = 300000;
+        // Cek saldo di tabel merchant_balances
         $currentMonth = now()->startOfMonth();
-        $vouchersThisMonth = Voucher::where('merchant_id', $merchant->id)
-            ->where('created_date', '>=', $currentMonth)
-            ->sum('value');
+        $year = now()->year;
+        $month = now()->month;
+
+        $balance = MerchantBalance::firstOrCreate(
+            [
+                'merchant_id' => $merchant->id,
+                'year' => $year,
+                'month' => $month,
+            ],
+            [
+                'used_balance' => 0,
+                'remaining_balance' => 300000,
+            ]
+        );
 
         $newVoucherValue = $request->value;
-        if ($vouchersThisMonth + $newVoucherValue > $monthlyLimit) {
+        $newUsedBalance = $balance->used_balance + $newVoucherValue;
+
+        if ($newUsedBalance > 300000) {
             return redirect()->back()->with('error', 'Limit voucher bulanan untuk merchant ini telah tercapai (maksimal 300.000 per bulan).');
         }
+
+        // Update saldo
+        $balance->update([
+            'used_balance' => $newUsedBalance,
+            'remaining_balance' => 300000 - $newUsedBalance,
+        ]);
 
         $voucher_id = 'VCH' . date('Ymd') . rand(100, 999);
         Voucher::create([
@@ -203,7 +222,29 @@ class AdminController extends Controller
         if (!Auth::check() || Auth::user()->role !== 'admin') {
             return redirect('/login');
         }
+
         $voucher = Voucher::findOrFail($id);
+        $merchant_id = $voucher->merchant_id;
+        $voucherValue = $voucher->value;
+        $createdDate = $voucher->created_date;
+
+        // Perbarui saldo di merchant_balances
+        $year = $createdDate->year;
+        $month = $createdDate->month;
+
+        $balance = MerchantBalance::where('merchant_id', $merchant_id)
+            ->where('year', $year)
+            ->where('month', $month)
+            ->first();
+
+        if ($balance) {
+            $newUsedBalance = max(0, $balance->used_balance - $voucherValue);
+            $balance->update([
+                'used_balance' => $newUsedBalance,
+                'remaining_balance' => 300000 - $newUsedBalance,
+            ]);
+        }
+
         $voucher->delete();
         return redirect()->back()->with('success', 'Voucher deleted successfully!');
     }
@@ -271,11 +312,21 @@ class AdminController extends Controller
         if (!Auth::check() || Auth::user()->role !== 'admin') {
             return redirect('/login');
         }
+
         $search = $request->query('search');
-        $query = User::select('id', 'username', 'whatsapp_number', 'information', 'role');
+        $year = now()->year;
+        $month = now()->month;
+
+        // Ambil data users dengan saldo merchant untuk bulan berjalan
+        $query = User::select('id', 'username', 'whatsapp_number', 'information', 'role')
+            ->with(['merchantBalances' => function ($query) use ($year, $month) {
+                $query->where('year', $year)->where('month', $month);
+            }]);
+
         if ($search) {
             $query->where('username', 'like', '%' . $search . '%');
         }
+
         $users = $query->get();
         return view('admin.users', compact('users', 'search'));
     }

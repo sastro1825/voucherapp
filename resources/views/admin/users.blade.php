@@ -51,8 +51,14 @@
 
     <!-- Notification -->
     @if (session('success'))
+        <div class="mb-6 p-4 bg-green-100 text-green-800 rounded">
+            {{ session('success') }}
+        </div>
     @endif
     @if (session('error'))
+        <div class="mb-6 p-4 bg-red-100 text-red-800 rounded">
+            {{ session('error') }}
+        </div>
     @endif
 
     <!-- Search Form -->
@@ -79,6 +85,7 @@
                         <th class="p-2 border dark:border-gray-600">Nomor WA</th>
                         <th class="p-2 border dark:border-gray-600">Role</th>
                         <th class="p-2 border dark:border-gray-600">Information</th>
+                        <th class="p-2 border dark:border-gray-600">Saldo Merchant</th>
                         <th class="p-2 border dark:border-gap-600">Actions</th>
                     </tr>
                 </thead>
@@ -89,6 +96,13 @@
                             <td class="p-2 text-center">{{ $user->whatsapp_number ?? '-' }}</td>
                             <td class="p-2 text-center">{{ ucfirst($user->role) }}</td>
                             <td class="p-2 text-center">{{ $user->information ?? '-' }}</td>
+                            <td class="p-2 text-center">
+                                @if ($user->role === 'merchant')
+                                    {{ $user->merchantBalances->first()->remaining_balance ?? 300000 }}
+                                @else
+                                    -
+                                @endif
+                            </td>
                             <td class="p-2">
                                 <div class="flex items-center justify-start space-x-2">
                                     <a href="{{ route('admin.user.edit', $user->id) }}" 

@@ -34,4 +34,9 @@ class User extends Authenticatable
     {
         return $this->password;
     }
+
+    public function merchantBalances()
+    {
+        return $this->hasMany(MerchantBalance::class, 'merchant_id');
+    }
 }
