@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Carbon\Carbon;
 
 class Voucher extends Model
 {
@@ -28,14 +29,14 @@ class Voucher extends Model
         'redeemed_at',
     ];
 
-    // Cast kolom tanggal sebagai datetime
+    // Cast kolom tanggal sebagai datetime dengan timezone Asia/Jakarta
     protected $casts = [
-        'created_date' => 'datetime',
-        'expiration_date' => 'datetime',
-        'sent_at' => 'datetime',
-        'redeemed_at' => 'datetime',
-        'created_at' => 'datetime',
-        'updated_at' => 'datetime',
+        'created_date' => 'datetime:Y-m-d H:i:s',
+        'expiration_date' => 'datetime:Y-m-d H:i:s',
+        'sent_at' => 'datetime:Y-m-d H:i:s',
+        'redeemed_at' => 'datetime:Y-m-d H:i:s',
+        'created_at' => 'datetime:Y-m-d H:i:s',
+        'updated_at' => 'datetime:Y-m-d H:i:s',
     ];
 
     public function redeemedVoucher()
@@ -46,5 +47,26 @@ class Voucher extends Model
     public function merchant()
     {
         return $this->belongsTo(User::class, 'merchant_id');
+    }
+
+    // Accessor untuk memformat tanggal dengan timezone WIB
+    public function getCreatedDateAttribute($value)
+    {
+        return Carbon::parse($value)->timezone('Asia/Jakarta')->format('Y-m-d H:i:s');
+    }
+
+    public function getExpirationDateAttribute($value)
+    {
+        return Carbon::parse($value)->timezone('Asia/Jakarta');
+    }
+
+    public function getSentAtAttribute($value)
+    {
+        return $value ? Carbon::parse($value)->timezone('Asia/Jakarta')->format('Y-m-d H:i:s') : null;
+    }
+
+    public function getRedeemedAtAttribute($value)
+    {
+        return $value ? Carbon::parse($value)->timezone('Asia/Jakarta')->format('Y-m-d H:i:s') : null;
     }
 }

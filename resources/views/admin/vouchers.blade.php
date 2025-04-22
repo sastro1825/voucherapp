@@ -51,15 +51,18 @@
 
     <!-- Notification -->
     @if (session('success'))
-        <div id="notification">
+        <div id="notification" class="bg-green-100 text-green-700 p-4 rounded mb-4">
+            {{ session('success') }}
         </div>
     @endif
     @if (session('error'))
-        <div id="notification">
+        <div id="notification" class="bg-red-100 text-red-700 p-4 rounded mb-4">
+            {{ session('error') }}
         </div>
     @endif
     @if (session('warning'))
-        <div id="notification">
+        <div id="notification" class="bg-yellow-100 text-yellow-700 p-4 rounded mb-4">
+            {{ session('warning') }}
         </div>
     @endif
 
@@ -98,11 +101,11 @@
                         <td class="p-2">{{ $voucher->id }}</td>
                         <td class="p-2">{{ $voucher->company_name }}</td>
                         <td class="p-2">{{ $voucher->value }}</td>
-                        <td class="p-2">{{ $voucher->created_date }}</td>
-                        <td class="p-2">{{ $voucher->expiration_date }}</td>
+                        <td class="p-2">{{ \Carbon\Carbon::parse($voucher->created_date)->timezone('Asia/Jakarta')->format('Y-m-d') }}</td>
+                        <td class="p-2">{{ \Carbon\Carbon::parse($voucher->expiration_date)->timezone('Asia/Jakarta')->format('Y-m-d') }}</td>
                         <td class="p-2">{{ $voucher->status }}</td>
                         <td class="p-2">{{ $voucher->redeemed_by ?? '-' }}</td>
-                        <td class="p-2">{{ $voucher->redeemed_at ?? '-' }}</td>
+                        <td class="p-2">{{ $voucher->redeemed_at ? \Carbon\Carbon::parse($voucher->redeemed_at)->timezone('Asia/Jakarta')->format('Y-m-d H:i:s') : '-' }}</td>
                         <td class="p-2">
                             <div class="flex items-center justify-center space-x-2">
                                 <a href="{{ route('voucher.send', $voucher->id) }}" 

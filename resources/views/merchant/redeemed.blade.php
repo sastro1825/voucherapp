@@ -43,7 +43,7 @@
                     <tr class="border-b dark:border-gray-600">
                         <td class="p-2">{{ $item->voucher->id }}</td>
                         <td class="p-2">{{ $item->voucher->value }}</td>
-                        <td class="p-2">{{ $item->redeemed_at }}</td>
+                        <td class="p-2">{{ \Carbon\Carbon::parse($item->redeemed_at)->timezone('Asia/Jakarta')->format('Y-m-d H:i:s') }}</td>
                     </tr>
                 @endforeach
             </tbody>

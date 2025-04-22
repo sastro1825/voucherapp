@@ -7,6 +7,7 @@ use App\Models\RedeemedVoucher;
 use App\Models\MerchantBalance;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Carbon\Carbon;
 
 class MerchantController extends Controller
 {
@@ -16,8 +17,8 @@ class MerchantController extends Controller
             return redirect('/login');
         }
 
-        $year = now()->year;
-        $month = now()->month;
+        $year = Carbon::now('Asia/Jakarta')->year;
+        $month = Carbon::now('Asia/Jakarta')->month;
 
         $balance = MerchantBalance::where('merchant_id', Auth::id())
             ->where('year', $year)
@@ -43,22 +44,27 @@ class MerchantController extends Controller
             return redirect()->back()->with('notification', ['type' => 'error', 'message' => 'Voucher not found!']);
         }
 
-        if ($voucher->status !== 'Active' || $voucher->expiration_date < now()) {
-            $voucher->status = $voucher->expiration_date < now() ? 'Expired' : $voucher->status;
+        if ($voucher->status !== 'Active' || Carbon::parse($voucher->expiration_date, 'Asia/Jakarta') < Carbon::now('Asia/Jakarta')) {
+            $voucher->status = Carbon::parse($voucher->expiration_date, 'Asia/Jakarta') < Carbon::now('Asia/Jakarta') ? 'Expired' : $voucher->status;
             $voucher->save();
             return redirect()->back()->with('notification', ['type' => 'error', 'message' => 'Voucher is invalid or expired!']);
+        }
+
+        // Periksa apakah merchant yang login adalah merchant yang terkait dengan voucher
+        if ($voucher->merchant_id !== Auth::id()) {
+            return redirect()->back()->with('notification', ['type' => 'error', 'message' => 'You are not authorized to redeem this voucher!']);
         }
 
         $voucher->update([
             'status' => 'Redeemed',
             'redeemed_by' => Auth::user()->username,
-            'redeemed_at' => now(),
+            'redeemed_at' => Carbon::now('Asia/Jakarta'),
         ]);
 
         RedeemedVoucher::create([
             'voucher_id' => $voucher->id,
             'user_id' => Auth::id(),
-            'redeemed_at' => now(),
+            'redeemed_at' => Carbon::now('Asia/Jakarta'),
         ]);
 
         return redirect()->back()->with('notification', ['type' => 'success', 'message' => 'Voucher redeemed successfully!']);

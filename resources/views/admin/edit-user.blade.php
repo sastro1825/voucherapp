@@ -87,6 +87,18 @@
                     <span class="text-red-500 text-sm">{{ $message }}</span>
                 @enderror
             </div>
+            @if ($user->role === 'merchant')
+                <div class="mb-4">
+                    <label for="remaining_balance" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Merchant Balance (Current Month)</label>
+                    <input type="number" name="remaining_balance" id="remaining_balance" 
+                           value="{{ old('remaining_balance', $balance ? $balance->remaining_balance : 300000) }}" 
+                           class="w-full p-2 border rounded mb-2 dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100" 
+                           placeholder="Enter remaining balance (0 - 300000)" min="0" max="300000" required>
+                    @error('remaining_balance')
+                        <span class="text-red-500 text-sm">{{ $message }}</span>
+                    @enderror
+                </div>
+            @endif
             <div class="mb-4">
                 <label for="password" class="block text-sm font-medium text-gray-700 dark:text-gray-300">New Password (optional)</label>
                 <input type="password" name="password" id="password" class="w-full p-2 border rounded mb-2 dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100" 

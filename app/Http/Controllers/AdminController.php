@@ -12,6 +12,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
+use Carbon\Carbon;
 
 class AdminController extends Controller
 {
@@ -68,9 +69,9 @@ class AdminController extends Controller
         $merchant = User::findOrFail($request->merchant_id);
 
         // Cek saldo di tabel merchant_balances
-        $currentMonth = now()->startOfMonth();
-        $year = now()->year;
-        $month = now()->month;
+        $currentMonth = Carbon::now('Asia/Jakarta')->startOfMonth();
+        $year = Carbon::now('Asia/Jakarta')->year;
+        $month = Carbon::now('Asia/Jakarta')->month;
 
         $balance = MerchantBalance::firstOrCreate(
             [
@@ -97,14 +98,14 @@ class AdminController extends Controller
             'remaining_balance' => 300000 - $newUsedBalance,
         ]);
 
-        $voucher_id = 'VCH' . date('Ymd') . rand(100, 999);
+        $voucher_id = 'VCH' . Carbon::now('Asia/Jakarta')->format('Ymd') . rand(100, 999);
         Voucher::create([
             'id' => $voucher_id,
             'company_name' => Setting::where('key_name', 'company_name')->first()->value ?? 'My Company',
             'value' => $newVoucherValue,
             'merchant_id' => $merchant->id,
-            'created_date' => now(),
-            'expiration_date' => now()->addMonths(3),
+            'created_date' => Carbon::now('Asia/Jakarta'),
+            'expiration_date' => Carbon::now('Asia/Jakarta')->addMonths(3),
             'status' => 'Active',
         ]);
         return redirect()->route('admin.create-voucher')->with('success', 'Voucher created successfully!');
@@ -165,7 +166,7 @@ class AdminController extends Controller
                 $query->where('status', 'Redeemed');
                 break;
             case 'expired':
-                $query->where('expiration_date', '<', now())->where('status', '!=', 'Redeemed');
+                $query->where('expiration_date', '<', Carbon::now('Asia/Jakarta'))->where('status', '!=', 'Redeemed');
                 break;
             default:
                 break;
@@ -226,7 +227,7 @@ class AdminController extends Controller
         $voucher = Voucher::findOrFail($id);
         $merchant_id = $voucher->merchant_id;
         $voucherValue = $voucher->value;
-        $createdDate = $voucher->created_date;
+        $createdDate = Carbon::parse($voucher->getRawOriginal('created_date'), 'Asia/Jakarta');
 
         // Perbarui saldo di merchant_balances
         $year = $createdDate->year;
@@ -256,6 +257,7 @@ class AdminController extends Controller
         }
 
         $voucher = Voucher::findOrFail($voucherId);
+        $merchant = User::findOrFail($voucher->merchant_id);
         $voucherLink = url("/voucher/public/{$voucher->id}");
 
         if (!preg_match('/^([0-9\s\-\+\(\)]*)$/', $whatsappNumber) || strlen($whatsappNumber) < 10) {
@@ -270,7 +272,11 @@ class AdminController extends Controller
             $whatsappNumber = '62' . ltrim($whatsappNumber, '0');
         }
 
-        $message = "Halo,\nBerikut adalah link voucher yang dapat Anda gunakan:\n{$voucherLink}\nTerima kasih!";
+        $merchantInfo = $merchant->information ? "{$merchant->username}, {$merchant->information}" : $merchant->username;
+        $minimumPurchase = $voucher->value * 2;
+        $message = "Selamat untuk pelanggan, anda mendapatkan voucher.\n" .
+                   "Berikut adalah link voucher yang dapat Anda gunakan:\n{$voucherLink}.\n" .
+                   "Voucher hanya dapat anda tukarkan ke {$merchantInfo} dalam jangka 3 bulan dengan minimal pembelian {$minimumPurchase}, Terima kasih!";
 
         $token = env('WABLAS_API_TOKEN');
         $secretKey = env('WABLAS_SECRET_KEY');
@@ -297,7 +303,7 @@ class AdminController extends Controller
             $voucher->update([
                 'sent_to' => $whatsappNumber,
                 'sent_status' => 'sent',
-                'sent_at' => now(),
+                'sent_at' => Carbon::now('Asia/Jakarta'),
             ]);
             return redirect()->back()->with('success', 'Link voucher berhasil dikirim ke WhatsApp.');
         } else {
@@ -314,8 +320,8 @@ class AdminController extends Controller
         }
 
         $search = $request->query('search');
-        $year = now()->year;
-        $month = now()->month;
+        $year = Carbon::now('Asia/Jakarta')->year;
+        $month = Carbon::now('Asia/Jakarta')->month;
 
         // Ambil data users dengan saldo merchant untuk bulan berjalan
         $query = User::select('id', 'username', 'whatsapp_number', 'information', 'role')
@@ -337,13 +343,23 @@ class AdminController extends Controller
             return redirect('/login');
         }
         $user = User::findOrFail($id);
+        $year = Carbon::now('Asia/Jakarta')->year;
+        $month = Carbon::now('Asia/Jakarta')->month;
+
         if ($request->isMethod('post')) {
-            $request->validate([
+            $rules = [
                 'username' => 'required|unique:users,username,' . $id,
                 'whatsapp_number' => 'required|regex:/^([0-9\s\-\+\(\)]*)$/|min:10',
                 'information' => 'nullable|string',
                 'password' => 'nullable|min:8|regex:/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/',
-            ], [
+            ];
+
+            // Tambahkan validasi untuk remaining_balance jika user adalah merchant
+            if ($user->role === 'merchant') {
+                $rules['remaining_balance'] = 'required|numeric|min:0|max:300000';
+            }
+
+            $messages = [
                 'username.required' => 'Username harus diisi.',
                 'username.unique' => 'Username sudah digunakan.',
                 'whatsapp_number.required' => 'Nomor WhatsApp harus diisi.',
@@ -351,8 +367,15 @@ class AdminController extends Controller
                 'whatsapp_number.min' => 'Nomor WhatsApp minimal 10 karakter.',
                 'password.min' => 'Password minimal 8 karakter.',
                 'password.regex' => 'Password harus mengandung huruf kecil, huruf besar, angka, dan karakter khusus (seperti @$!%*?&).',
-            ]);
+                'remaining_balance.required' => 'Saldo merchant harus diisi.',
+                'remaining_balance.numeric' => 'Saldo merchant harus berupa angka.',
+                'remaining_balance.min' => 'Saldo merchant tidak boleh kurang dari 0.',
+                'remaining_balance.max' => 'Saldo merchant tidak boleh lebih dari 300.000.',
+            ];
 
+            $request->validate($rules, $messages);
+
+            // Update data user
             $user->username = $request->username;
             $user->whatsapp_number = $request->whatsapp_number;
             $user->information = $request->information;
@@ -361,9 +384,42 @@ class AdminController extends Controller
             }
             $user->save();
 
+            // Update saldo merchant jika role adalah merchant
+            if ($user->role === 'merchant') {
+                $balance = MerchantBalance::firstOrCreate(
+                    [
+                        'merchant_id' => $user->id,
+                        'year' => $year,
+                        'month' => $month,
+                    ],
+                    [
+                        'used_balance' => 0,
+                        'remaining_balance' => 300000,
+                    ]
+                );
+
+                $newRemainingBalance = $request->remaining_balance;
+                $newUsedBalance = 300000 - $newRemainingBalance;
+
+                $balance->update([
+                    'used_balance' => $newUsedBalance,
+                    'remaining_balance' => $newRemainingBalance,
+                ]);
+            }
+
             return redirect()->route('admin.users')->with('success', 'User updated successfully!');
         }
-        return view('admin.edit-user', compact('user'));
+
+        // Ambil data saldo merchant untuk ditampilkan di form
+        $balance = null;
+        if ($user->role === 'merchant') {
+            $balance = MerchantBalance::where('merchant_id', $user->id)
+                ->where('year', $year)
+                ->where('month', $month)
+                ->first();
+        }
+
+        return view('admin.edit-user', compact('user', 'balance'));
     }
 
     public function deleteUser($id)
