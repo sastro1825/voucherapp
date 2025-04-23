@@ -84,7 +84,7 @@
                     <th class="p-2 border dark:border-gray-600">Company Name</th>
                     <th class="p-2 border dark:border-gray-600">Value</th>
                     <th class="p-2 border dark:border-gray-600">Created</th>
-                    <th class="p-2 border dark:border-gray-600">Expires</th>
+                    <th class="p-2 border dark:border-gray-600">Expired</th>
                     <th class="p-2 border dark:border-gray-600">Status</th>
                     <th class="p-2 border dark:border-gray-600">Redeemed By</th>
                     <th class="p-2 border dark:border-gray-600">Redeemed At</th>

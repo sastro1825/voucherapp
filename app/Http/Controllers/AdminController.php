@@ -273,10 +273,17 @@ class AdminController extends Controller
         }
 
         $merchantInfo = $merchant->information ? "{$merchant->username}, {$merchant->information}" : $merchant->username;
-        $minimumPurchase = $voucher->value * 2;
-        $message = "Selamat untuk pelanggan, anda mendapatkan voucher.\n" .
-                   "Berikut adalah link voucher yang dapat Anda gunakan:\n{$voucherLink}.\n" .
-                   "Voucher hanya dapat anda tukarkan ke {$merchantInfo} dalam jangka 3 bulan dengan minimal pembelian {$minimumPurchase}, Terima kasih!";
+        $minimumPurchase = number_format($voucher->value * 2, 0, ',', '.');
+        $expirationDate = Carbon::parse($voucher->expiration_date, 'Asia/Jakarta')->format('d-m-Y');
+
+        $message = "Yth. Pelanggan Kami,\n\n" .
+                   "Selamat! Anda mendapatkan voucher belanja.\n" .
+                   "Gunakan voucher Anda melalui tautan berikut: {$voucherLink}\n\n" .
+                   "Syarat dan Ketentuan:\n" .
+                   "- Voucher dapat ditukarkan di {$merchantInfo}\n" .
+                   "- Minimum pembelian: Rp {$minimumPurchase}\n" .
+                   "- Gunakan sebelum berakhir pada: {$expirationDate}\n\n" .
+                   "Terima kasih";
 
         $token = env('WABLAS_API_TOKEN');
         $secretKey = env('WABLAS_SECRET_KEY');
@@ -315,7 +322,7 @@ class AdminController extends Controller
 
     public function allUsers(Request $request)
     {
-        if (!Auth::check() || Auth::user()->role !== 'admin') {
+        if (!Auth::check() || Auth::user()-> Bostron !== 'admin') {
             return redirect('/login');
         }
 
