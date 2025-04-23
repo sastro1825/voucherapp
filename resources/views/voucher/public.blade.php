@@ -188,7 +188,7 @@
             <p><strong>Company:</strong> <span>{{ $voucher->company_name }}</span></p>
             <p><strong>Value:</strong> <span>{{ $voucher->value }}</span></p>
             <p><strong>Minimum Pembelanjaan:</strong> <span>{{ $voucher->value * 2 }}</span></p>
-            <p><strong>Tukarkan pada:</strong> <span>{{ $voucher->merchant->username }}{{ $voucher->merchant->information ? ', ' . $voucher->merchant->information : '' }}</span></p>
+            <p><strong>Tukarkan pada:</strong> <span>{{ $voucher->merchant ? ($voucher->merchant->username . ($voucher->merchant->information ? ', ' . $voucher->merchant->information : '')) : 'Unknown Merchant' }}</span></p>
             <p><strong>Expires:</strong> <span>{{ $voucher->expiration_date ? $voucher->expiration_date->format('d M Y') : 'N/A' }}</span></p>
             <p><strong>Status:</strong> <span>{{ $voucher->status }}</span></p>
             @if ($voucher->redeemed_by)
