@@ -76,17 +76,19 @@
                 <thead>
                     <tr class="bg-gray-200 dark:bg-gray-700">
                         <th class="p-2 border dark:border-gray-600">Username</th>
+                        <th class="p-2 border dark:border-gray-600">Merchant Name</th>
                         <th class="p-2 border dark:border-gray-600">Nomor WA</th>
                         <th class="p-2 border dark:border-gray-600">Role</th>
                         <th class="p-2 border dark:border-gray-600">Information</th>
                         <th class="p-2 border dark:border-gray-600">Saldo Merchant</th>
-                        <th class="p-2 border dark:border-gap-600">Actions</th>
+                        <th class="p-2 border dark:border-gray-600">Actions</th>
                     </tr>
                 </thead>
                 <tbody>
                     @foreach ($users as $user)
                         <tr class="border-b dark:border-gray-600">
                             <td class="p-2 text-center">{{ $user->username }}</td>
+                            <td class="p-2 text-center">{{ $user->merchant_name ?? '-' }}</td>
                             <td class="p-2 text-center">{{ $user->whatsapp_number ?? '-' }}</td>
                             <td class="p-2 text-center">{{ ucfirst($user->role) }}</td>
                             <td class="p-2 text-center">{{ $user->information ?? '-' }}</td>

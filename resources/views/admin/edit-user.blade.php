@@ -64,6 +64,17 @@
                     <span class="text-red-500 text-sm">{{ $message }}</span>
                 @enderror
             </div>
+            @if ($user->role === 'merchant')
+                <div class="mb-4">
+                    <label for="merchant_name" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Merchant Name</label>
+                    <input type="text" name="merchant_name" id="merchant_name" value="{{ old('merchant_name', $user->merchant_name) }}" 
+                           class="w-full p-2 border rounded mb-2 dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100" 
+                           placeholder="Merchant Name" required>
+                    @error('merchant_name')
+                        <span class="text-red-500 text-sm">{{ $message }}</span>
+                    @enderror
+                </div>
+            @endif
             <div class="mb-4">
                 <label for="whatsapp_number" class="block text-sm font-medium text-gray-700 dark:text-gray-300">WhatsApp Number</label>
                 <input type="text" name="whatsapp_number" id="whatsapp_number" value="{{ old('whatsapp_number', $user->whatsapp_number) }}" 

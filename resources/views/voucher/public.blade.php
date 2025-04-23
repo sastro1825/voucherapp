@@ -68,7 +68,7 @@
         .terms {
             text-align: center;
             font-size: 0.8rem;
-            color: #ff6b6b; /* Changed to red */
+            color: #ff6b6b;
             margin: 0.5rem 0;
             font-weight: 500;
         }
@@ -193,10 +193,16 @@
             <p><strong>ID:</strong> <span>{{ $voucher->id }}</span></p>
             <p><strong>Company:</strong> <span>{{ $voucher->company_name }}</span></p>
             <p><strong>Value:</strong> <span>{{ $voucher->value }}</span></p>
-            <p><strong class="merchant-label">Tukarkan pada:</strong><span>{{ $voucher->merchant ? ($voucher->merchant->information ?: 'No Information') : 'Unknown Merchant' }}</span></p>
+            <p><strong class="merchant-label">Tukarkan pada:</strong><span>{{ $voucher->merchant ? ($voucher->merchant->merchant_name ?: 'No Merchant Name') : 'Unknown Merchant' }}</span></p>
             <style>
             .merchant-label {
                 margin-right: 20px;
+            }
+            </style>
+            <p><strong class="merchant-label1">Alamat:</strong><span>{{ $voucher->merchant ? ($voucher->merchant->information ?: 'No information') : 'Unknown Merchant' }}</span></p>
+            <style>
+            .merchant-label1 {
+                margin-right: 40px;
             }
             </style>
             <p><strong>Expired:</strong> <span>{{ $voucher->expiration_date ? $voucher->expiration_date->format('d M Y') : 'N/A' }}</span></p>
@@ -207,7 +213,7 @@
         </div>
 
         <div class="terms">
-            Syarat dan Ketentuan Berlaku: Minimum Pembelanjaa {{ $voucher->value * 2 }}
+            Syarat dan Ketentuan Berlaku: Minimum Pembelanjaan {{ $voucher->value * 2 }}
         </div>
 
         <div class="barcode-container">

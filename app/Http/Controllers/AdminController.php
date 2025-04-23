@@ -126,12 +126,14 @@ class AdminController extends Controller
         }
         $request->validate([
             'username' => 'required|unique:users',
+            'merchant_name' => 'required|string|max:255',
             'password' => 'required|min:8|regex:/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/',
             'whatsapp_number' => 'required|regex:/^([0-9\s\-\+\(\)]*)$/|min:10',
             'information' => 'nullable|string',
         ], [
             'username.required' => 'Username harus diisi.',
             'username.unique' => 'Username sudah digunakan.',
+            'merchant_name.required' => 'Nama merchant harus diisi.',
             'password.required' => 'Password harus diisi.',
             'password.min' => 'Password minimal 8 karakter.',
             'password.regex' => 'Password harus mengandung huruf kecil, huruf besar, angka, dan karakter khusus (seperti @$!%*?&).',
@@ -142,6 +144,7 @@ class AdminController extends Controller
 
         User::create([
             'username' => $request->username,
+            'merchant_name' => $request->merchant_name,
             'password' => Hash::make($request->password),
             'whatsapp_number' => $request->whatsapp_number,
             'information' => $request->information,
@@ -272,7 +275,10 @@ class AdminController extends Controller
             $whatsappNumber = '62' . ltrim($whatsappNumber, '0');
         }
 
-        $merchantInfo = $merchant->information ? "{$merchant->information}" : $merchant->username;
+        // Prioritize non-empty merchant_name, fallback to username
+        $merchantName = !empty($merchant->merchant_name) ? $merchant->merchant_name : $merchant->username;
+        // Prioritize non-empty information for address, fallback to username
+        $merchantInfo = !empty($merchant->information) ? $merchant->information : $merchant->username;
         $minimumPurchase = number_format($voucher->value * 2, 0, ',', '.');
         $expirationDate = Carbon::parse($voucher->expiration_date, 'Asia/Jakarta')->format('d-m-Y');
 
@@ -280,7 +286,8 @@ class AdminController extends Controller
                    "Selamat! Anda mendapatkan voucher belanja.\n" .
                    "Gunakan voucher Anda melalui tautan berikut: {$voucherLink}\n\n" .
                    "Syarat dan Ketentuan:\n" .
-                   "- Voucher dapat digunakan pada: {$merchantInfo}\n" .
+                   "- Gunakan voucher pada: {$merchantName}\n" .
+                   "- Alamat: {$merchantInfo}\n" .
                    "- Minimum belanja: Rp {$minimumPurchase}\n" .
                    "- Berlaku hingga: {$expirationDate}\n\n" .
                    "Terima kasih";
@@ -331,7 +338,7 @@ class AdminController extends Controller
         $month = Carbon::now('Asia/Jakarta')->month;
 
         // Ambil data users dengan saldo merchant untuk bulan berjalan
-        $query = User::select('id', 'username', 'whatsapp_number', 'information', 'role')
+        $query = User::select('id', 'username', 'merchant_name', 'whatsapp_number', 'information', 'role')
             ->with(['merchantBalances' => function ($query) use ($year, $month) {
                 $query->where('year', $year)->where('month', $month);
             }]);
@@ -361,14 +368,15 @@ class AdminController extends Controller
                 'password' => 'nullable|min:8|regex:/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/',
             ];
 
-            // Tambahkan validasi untuk remaining_balance jika user adalah merchant
             if ($user->role === 'merchant') {
+                $rules['merchant_name'] = 'required|string|max:255';
                 $rules['remaining_balance'] = 'required|numeric|min:0|max:300000';
             }
 
             $messages = [
                 'username.required' => 'Username harus diisi.',
                 'username.unique' => 'Username sudah digunakan.',
+                'merchant_name.required' => 'Nama merchant harus diisi.',
                 'whatsapp_number.required' => 'Nomor WhatsApp harus diisi.',
                 'whatsapp_number.regex' => 'Nomor WhatsApp hanya boleh berisi angka, spasi, tanda minus, plus, atau tanda kurung.',
                 'whatsapp_number.min' => 'Nomor WhatsApp minimal 10 karakter.',
@@ -382,8 +390,8 @@ class AdminController extends Controller
 
             $request->validate($rules, $messages);
 
-            // Update data user
             $user->username = $request->username;
+            $user->merchant_name = $request->merchant_name;
             $user->whatsapp_number = $request->whatsapp_number;
             $user->information = $request->information;
             if ($request->filled('password')) {
@@ -391,7 +399,6 @@ class AdminController extends Controller
             }
             $user->save();
 
-            // Update saldo merchant jika role adalah merchant
             if ($user->role === 'merchant') {
                 $balance = MerchantBalance::firstOrCreate(
                     [
@@ -417,7 +424,6 @@ class AdminController extends Controller
             return redirect()->route('admin.users')->with('success', 'User updated successfully!');
         }
 
-        // Ambil data saldo merchant untuk ditampilkan di form
         $balance = null;
         if ($user->role === 'merchant') {
             $balance = MerchantBalance::where('merchant_id', $user->id)
