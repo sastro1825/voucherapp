@@ -21,7 +21,7 @@
             border-radius: 15px;
             box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15);
             padding: 1rem;
-            width: 320px; /* Ukuran kecil seperti kupon */
+            width: 320px;
             height: auto;
             position: relative;
             overflow: hidden;
@@ -65,6 +65,14 @@
             font-weight: 600;
         }
 
+        .terms {
+            text-align: center;
+            font-size: 0.8rem;
+            color: #555;
+            margin: 0.5rem 0;
+            font-weight: 500;
+        }
+
         .barcode-container {
             text-align: center;
             padding: 0.5rem;
@@ -80,7 +88,7 @@
         }
 
         .barcode-container svg, .barcode-container img {
-            width: 120px; /* Ukuran barcode lebih kecil */
+            width: 120px;
             height: 120px;
             display: block;
             margin: 0 auto;
@@ -108,7 +116,6 @@
             transform: scale(1.05);
         }
 
-        /* Dekorasi tambahan */
         .voucher-container::before {
             content: '';
             position: absolute;
@@ -131,50 +138,49 @@
             border-radius: 50%;
         }
 
-        /* Media Query untuk Cetak */
         @media print {
             body {
-                background: none; /* Hilangkan background gradient saat cetak */
+                background: none;
                 margin: 0;
                 padding: 0;
                 display: block;
             }
             .voucher-container {
-                background: linear-gradient(145deg, #ffffff, #f0f4ff); /* Pertahankan gradient */
-                border: 3px dashed #ff6b6b; /* Pertahankan border dashed */
-                border-radius: 15px; /* Pertahankan border radius */
-                box-shadow: none; /* Hilangkan shadow saat cetak */
+                background: linear-gradient(145deg, #ffffff, #f0f4ff);
+                border: 3px dashed #ff6b6b;
+                border-radius: 15px;
+                box-shadow: none;
                 padding: 1rem;
-                width: 320px; /* Ukuran tetap */
+                width: 320px;
                 margin: 0 auto;
-                position: static; /* Hilangkan posisi relatif */
-                overflow: visible; /* Pastikan tidak ada overflow */
-                page-break-inside: avoid; /* Hindari pemisahan halaman */
+                position: static;
+                overflow: visible;
+                page-break-inside: avoid;
             }
             .voucher-header {
-                background: #ff6b6b; /* Pertahankan warna header */
-                color: #fff; /* Pertahankan warna teks */
-                margin: -1rem -1rem 1rem -1rem; /* Pertahankan margin */
-                border-radius: 10px 10px 0 0; /* Pertahankan radius */
+                background: #ff6b6b;
+                color: #fff;
+                margin: -1rem -1rem 1rem -1rem;
+                border-radius: 10px 10px 0 0;
             }
             .voucher-details p {
-                background: rgba(255, 255, 255, 0.8); /* Pertahankan background detail */
-                padding: 0.2rem 0.5rem; /* Pertahankan padding */
+                background: rgba(255, 255, 255, 0.8);
+                padding: 0.2rem 0.5rem;
             }
             .barcode-container {
-                background: #fff; /* Pertahankan background barcode */
-                padding: 0.5rem; /* Pertahankan padding */
-                border-radius: 10px; /* Pertahankan radius */
+                background: #fff;
+                padding: 0.5rem;
+                border-radius: 10px;
             }
             .barcode-container svg, .barcode-container img {
-                width: 120px; /* Pertahankan ukuran barcode */
+                width: 120px;
                 height: 120px;
             }
             .no-print {
-                display: none; /* Sembunyikan tombol print saat cetak */
+                display: none;
             }
             .voucher-container::before, .voucher-container::after {
-                display: block; /* Pertahankan dekorasi saat cetak */
+                display: block;
             }
         }
     </style>
@@ -187,13 +193,16 @@
             <p><strong>ID:</strong> <span>{{ $voucher->id }}</span></p>
             <p><strong>Company:</strong> <span>{{ $voucher->company_name }}</span></p>
             <p><strong>Value:</strong> <span>{{ $voucher->value }}</span></p>
-            <p><strong>Minimum Pembelanjaan:</strong> <span>{{ $voucher->value * 2 }}</span></p>
             <p><strong>Tukarkan pada:</strong> <span>{{ $voucher->merchant ? ($voucher->merchant->username . ($voucher->merchant->information ? ', ' . $voucher->merchant->information : '')) : 'Unknown Merchant' }}</span></p>
-            <p><strong>Expires:</strong> <span>{{ $voucher->expiration_date ? $voucher->expiration_date->format('d M Y') : 'N/A' }}</span></p>
+            <p><strong>Expired:</strong> <span>{{ $voucher->expiration_date ? $voucher->expiration_date->format('d M Y') : 'N/A' }}</span></p>
             <p><strong>Status:</strong> <span>{{ $voucher->status }}</span></p>
             @if ($voucher->redeemed_by)
                 <p><strong>Redeemed By:</strong> <span>{{ $voucher->redeemed_by }}</span></p>
             @endif
+        </div>
+
+        <div class="terms">
+            Syarat dan Ketentuan Berlaku: Minimum Pembelanjaan {{ $voucher->value * 2 }}
         </div>
 
         <div class="barcode-container">
