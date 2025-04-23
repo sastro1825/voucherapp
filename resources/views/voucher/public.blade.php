@@ -202,7 +202,7 @@
         </div>
 
         <div class="terms">
-            Syarat dan Ketentuan Berlaku: Minimum Pembelanjaan {{ $voucher->value * 2 }}
+            Syarat dan Ketentuan Berlaku: Minimum Pembelanjaa {{ $voucher->value * 2 }}
         </div>
 
         <div class="barcode-container">
