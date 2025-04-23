@@ -68,7 +68,7 @@
         .terms {
             text-align: center;
             font-size: 0.8rem;
-            color: #555;
+            color: #ff6b6b; /* Changed to red */
             margin: 0.5rem 0;
             font-weight: 500;
         }
