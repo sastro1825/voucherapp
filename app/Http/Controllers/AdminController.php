@@ -272,7 +272,7 @@ class AdminController extends Controller
             $whatsappNumber = '62' . ltrim($whatsappNumber, '0');
         }
 
-        $merchantInfo = $merchant->information ? "{$merchant->username}, {$merchant->information}" : $merchant->username;
+        $merchantInfo = $merchant->information ? "{$merchant->information}" : $merchant->username;
         $minimumPurchase = number_format($voucher->value * 2, 0, ',', '.');
         $expirationDate = Carbon::parse($voucher->expiration_date, 'Asia/Jakarta')->format('d-m-Y');
 
@@ -280,9 +280,9 @@ class AdminController extends Controller
                    "Selamat! Anda mendapatkan voucher belanja.\n" .
                    "Gunakan voucher Anda melalui tautan berikut: {$voucherLink}\n\n" .
                    "Syarat dan Ketentuan:\n" .
-                   "- Voucher dapat ditukarkan di {$merchantInfo}\n" .
-                   "- Minimum pembelian: Rp {$minimumPurchase}\n" .
-                   "- Gunakan sebelum berakhir pada: {$expirationDate}\n\n" .
+                   "- Voucher dapat digunakan pada: {$merchantInfo}\n" .
+                   "- Minimum belanja: Rp {$minimumPurchase}\n" .
+                   "- Berlaku hingga: {$expirationDate}\n\n" .
                    "Terima kasih";
 
         $token = env('WABLAS_API_TOKEN');
