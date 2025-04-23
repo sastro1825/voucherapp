@@ -322,7 +322,7 @@ class AdminController extends Controller
 
     public function allUsers(Request $request)
     {
-        if (!Auth::check() || Auth::user()-> Bostron !== 'admin') {
+        if (!Auth::check() || Auth::user()->role !== 'admin') {
             return redirect('/login');
         }
 
