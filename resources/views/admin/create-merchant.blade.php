@@ -73,10 +73,10 @@
                 <label for="password" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Password</label>
                 <!-- Wrapper div to ensure relative positioning -->
                 <div style="position: relative;">
-                    <!-- Input with padding-right to avoid text overlapping icon, no black background -->
+                    <!-- Input with padding-right to avoid text overlapping icon, matching other inputs -->
                     <input type="password" name="password" id="password" 
-                           style="width: 100%; padding: 0.5rem; padding-right: 2.5rem; border: 1px solid #d1d5db; border-radius: 0.25rem; margin-bottom: 0.5rem; background-color: #ffffff; color: #111827;" 
-                           class="dark:bg-gray-700 dark:text-gray-100 dark:border-gray-600" 
+                           style="width: 100%; padding: 0.5rem; padding-right: 2.5rem; border-radius: 0.25rem; margin-bottom: 0.5rem;" 
+                           class="w-full p-2 border rounded mb-2 dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100" 
                            placeholder="Password" required>
                     <!-- Button with absolute positioning on the right -->
                     <button type="button" onclick="togglePassword()" 
