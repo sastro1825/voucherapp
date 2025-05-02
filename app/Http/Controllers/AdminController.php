@@ -12,6 +12,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
 
 class AdminController extends Controller
@@ -43,7 +44,7 @@ class AdminController extends Controller
             ['key_name' => 'company_name'],
             ['value' => $request->company_name]
         );
-        return redirect()->route('admin.update-company')->with('success', 'Company name updated successfully!');
+        return redirect()->route('CoffeeShop updated successfully!');
     }
 
     public function showCreateVoucherForm()
@@ -68,7 +69,7 @@ class AdminController extends Controller
 
         $merchant = User::findOrFail($request->merchant_id);
 
-        // Cek saldo di tabel merchant_balances
+        // Check balance in merchant_balances
         $currentMonth = Carbon::now('Asia/Jakarta')->startOfMonth();
         $year = Carbon::now('Asia/Jakarta')->year;
         $month = Carbon::now('Asia/Jakarta')->month;
@@ -89,10 +90,10 @@ class AdminController extends Controller
         $newUsedBalance = $balance->used_balance + $newVoucherValue;
 
         if ($newUsedBalance > 1000000000) {
-            return redirect()->back()->with('error', 'Limit');
+            return redirect()->back()->with('error', 'Limit exceeded');
         }
 
-        // Update saldo
+        // Update balance
         $balance->update([
             'used_balance' => $newUsedBalance,
             'remaining_balance' => 1000000000 - $newUsedBalance,
@@ -124,12 +125,14 @@ class AdminController extends Controller
         if (!Auth::check() || Auth::user()->role !== 'admin') {
             return redirect('/login');
         }
+
         $request->validate([
             'username' => 'required|unique:users',
             'merchant_name' => 'required|string|max:255',
             'password' => 'required|min:8|regex:/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/',
             'whatsapp_number' => 'required|regex:/^([0-9\s\-\+\(\)]*)$/|min:10',
             'information' => 'nullable|string',
+            'remaining_balance' => 'required|numeric|min:0|max:1000000000',
         ], [
             'username.required' => 'Username harus diisi.',
             'username.unique' => 'Username sudah digunakan.',
@@ -140,17 +143,38 @@ class AdminController extends Controller
             'whatsapp_number.required' => 'Nomor WhatsApp harus diisi.',
             'whatsapp_number.regex' => 'Nomor WhatsApp hanya boleh berisi angka, spasi, tanda minus, plus, atau tanda kurung.',
             'whatsapp_number.min' => 'Nomor WhatsApp minimal 10 karakter.',
+            'remaining_balance.required' => 'Saldo merchant harus diisi.',
+            'remaining_balance.numeric' => 'Saldo merchant harus berupa angka.',
+            'remaining_balance.min' => 'Saldo merchant tidak boleh kurang dari 0.',
+            'remaining_balance.max' => 'Saldo merchant tidak boleh lebih dari 1.000.000.000.',
         ]);
 
-        User::create([
-            'username' => $request->username,
-            'merchant_name' => $request->merchant_name,
-            'password' => Hash::make($request->password),
-            'whatsapp_number' => $request->whatsapp_number,
-            'information' => $request->information,
-            'role' => 'merchant',
-        ]);
-        return redirect()->route('admin.create-merchant')->with('success', 'Merchant created successfully!');
+        DB::beginTransaction();
+        try {
+            $user = User::create([
+                'username' => $request->username,
+                'merchant_name' => $request->merchant_name,
+                'password' => Hash::make($request->password),
+                'whatsapp_number' => $request->whatsapp_number,
+                'information' => $request->information,
+                'role' => 'merchant',
+            ]);
+
+            MerchantBalance::create([
+                'merchant_id' => $user->id,
+                'year' => Carbon::now('Asia/Jakarta')->year,
+                'month' => Carbon::now('Asia/Jakarta')->month,
+                'used_balance' => 1000000000 - $request->remaining_balance,
+                'remaining_balance' => $request->remaining_balance,
+            ]);
+
+            DB::commit();
+            return redirect()->route('admin.create-merchant')->with('success', 'Merchant created successfully!');
+        } catch (\Exception $e) {
+            DB::rollBack();
+            Log::error('Failed to create merchant: ' . $e->getMessage());
+            return redirect()->back()->with('error', 'Failed to create merchant. Please try again.');
+        }
     }
 
     public function allVouchers(Request $request)
@@ -232,7 +256,7 @@ class AdminController extends Controller
         $voucherValue = $voucher->value;
         $createdDate = Carbon::parse($voucher->getRawOriginal('created_date'), 'Asia/Jakarta');
 
-        // Perbarui saldo di merchant_balances
+        // Update balance in merchant_balances
         $year = $createdDate->year;
         $month = $createdDate->month;
 
@@ -264,20 +288,18 @@ class AdminController extends Controller
         $voucherLink = url("/voucher/public/{$voucher->id}");
 
         if (!preg_match('/^([0-9\s\-\+\(\)]*)$/', $whatsappNumber) || strlen($whatsappNumber) < 10) {
-            return redirect()->back()->with('error', 'Nomor WhatsApp tidak valid.');
+            return redirect()->back()->with('error', 'Invalid WhatsApp number.');
         }
 
         if ($voucher->sent_to === $whatsappNumber) {
-            return redirect()->back()->with('warning', "Voucher ini sudah pernah dikirim ke nomor {$whatsappNumber}.");
+            return redirect()->back()->with('warning', "This voucher has already been sent to {$whatsappNumber}.");
         }
 
         if (!str_starts_with($whatsappNumber, '62')) {
             $whatsappNumber = '62' . ltrim($whatsappNumber, '0');
         }
 
-        // Prioritize non-empty merchant_name, fallback to username
         $merchantName = !empty($merchant->merchant_name) ? $merchant->merchant_name : $merchant->username;
-        // Prioritize non-empty information for address, fallback to username
         $merchantInfo = !empty($merchant->information) ? $merchant->information : $merchant->username;
         $minimumPurchase = number_format($voucher->value * 2, 0, ',', '.');
         $expirationDate = Carbon::parse($voucher->expiration_date, 'Asia/Jakarta')->format('d-m-Y');
@@ -319,11 +341,11 @@ class AdminController extends Controller
                 'sent_status' => 'sent',
                 'sent_at' => Carbon::now('Asia/Jakarta'),
             ]);
-            return redirect()->back()->with('success', 'Link voucher berhasil dikirim ke WhatsApp.');
+            return redirect()->back()->with('success', 'Voucher link sent to WhatsApp successfully.');
         } else {
             $errorMessage = $response->json()['message'] ?? 'Unknown error';
             Log::error('Failed to send WhatsApp message via WABLAS', ['error' => $errorMessage]);
-            return redirect()->back()->with('error', 'Gagal mengirim link voucher ke WhatsApp: ' . $errorMessage);
+            return redirect()->back()->with('error', 'Failed to send voucher link to WhatsApp: ' . $errorMessage);
         }
     }
 
@@ -337,7 +359,6 @@ class AdminController extends Controller
         $year = Carbon::now('Asia/Jakarta')->year;
         $month = Carbon::now('Asia/Jakarta')->month;
 
-        // Ambil data users dengan saldo merchant untuk bulan berjalan
         $query = User::select('id', 'username', 'merchant_name', 'whatsapp_number', 'information', 'role')
             ->with(['merchantBalances' => function ($query) use ($year, $month) {
                 $query->where('year', $year)->where('month', $month);
@@ -385,7 +406,7 @@ class AdminController extends Controller
                 'remaining_balance.required' => 'Saldo merchant harus diisi.',
                 'remaining_balance.numeric' => 'Saldo merchant harus berupa angka.',
                 'remaining_balance.min' => 'Saldo merchant tidak boleh kurang dari 0.',
-                'remaining_balance.max' => 'Saldo merchant tidak boleh lebih dari 300.000.',
+                'remaining_balance.max' => 'Saldo merchant tidak boleh lebih dari 1.000.000.000.',
             ];
 
             $request->validate($rules, $messages);

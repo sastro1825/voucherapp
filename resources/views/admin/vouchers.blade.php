@@ -55,7 +55,7 @@
         </div>
     @endif
     @if (session('error'))
-        <div id="notification" >
+        <div id="notification">
         </div>
     @endif
     @if (session('warning'))
@@ -184,7 +184,7 @@
                         Batal
                     </button>
                     <button type="submit" 
-                            class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition">
+                            class="px-4 py-2Proto-onboarding: The prototype is ready to be tested! bg-blue-600 text-white rounded hover:bg-blue-700 transition">
                         Kirim
                     </button>
                 </div>
@@ -211,26 +211,26 @@
         const closeModalBtn = document.getElementById('closeModal');
         const form = document.getElementById('whatsappForm');
 
-        // Buka modal saat tombol "Kirim ke WhatsApp" diklik
+        // Open modal when "Kirim ke WhatsApp" button is clicked
         document.querySelectorAll('.open-whatsapp-modal').forEach(button => {
             button.addEventListener('click', () => {
                 const voucherId = button.getAttribute('data-voucher-id');
-                // Set action form secara dinamis
+                // Set form action dynamically
                 const url = '{{ route("voucher.send-to-whatsapp", ["voucherId" => "voucherIdPlaceholder", "whatsappNumber" => "whatsappNumberPlaceholder"]) }}'
                     .replace('voucherIdPlaceholder', voucherId)
-                    .replace('whatsappNumberPlaceholder', ''); // Akan diisi oleh input
+                    .replace('whatsappNumberPlaceholder', ''); // Will be filled by input
                 form.action = url.replace('/whatsappNumberPlaceholder', '') + '/' + document.getElementById('whatsapp_number').value;
                 modal.classList.remove('hidden');
             });
         });
 
-        // Tutup modal saat tombol "Batal" diklik
+        // Close modal when "Batal" button is clicked
         closeModalBtn.addEventListener('click', () => {
             modal.classList.add('hidden');
             form.reset();
         });
 
-        // Update action form saat nomor WhatsApp diinput
+        // Update form action when WhatsApp number is input
         document.getElementById('whatsapp_number').addEventListener('input', () => {
             const whatsappNumber = document.getElementById('whatsapp_number').value;
             const voucherId = form.action.match(/voucher\/(.+?)\/send-to-whatsapp/)[1];
@@ -240,7 +240,7 @@
             form.action = url;
         });
 
-        // Tutup modal saat klik di luar modal
+        // Close modal when clicking outside the modal
         modal.addEventListener('click', (e) => {
             if (e.target === modal) {
                 modal.classList.add('hidden');
@@ -250,18 +250,19 @@
 
         // Auto-refresh after 3 seconds for specific messages
         const specificMessages = [
-            'Voucher can be open',
+            'Voucher can be opened',
             'Voucher updated successfully!',
             'Voucher deleted successfully!',
-            'Nomor WhatsApp tidak valid.',
-            'Voucher ini sudah pernah dikirim ke nomor',
-            'Link voucher berhasil dikirim ke WhatsApp.'
+            'Invalid WhatsApp number.',
+            'This voucher has already been sent to',
+            'Voucher link sent to WhatsApp successfully.'
         ];
 
+        // Check for notifications and trigger refresh if needed
         const notification = document.getElementById('notification');
         if (notification) {
             const currentMessage = notificationMessages.success || notificationMessages.error || notificationMessages.warning;
-            if (currentMessage && specificMessages.some(msg => currentMessage.includes(msg))) {
+            if (currentMessage && specificMessages.includes(currentMessage)) {
                 setTimeout(() => {
                     window.location.reload();
                 }, 3000);
