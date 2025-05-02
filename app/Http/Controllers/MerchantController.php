@@ -26,7 +26,7 @@ class MerchantController extends Controller
             ->first();
 
         $voucherUsedThisMonth = $balance ? $balance->used_balance : 0;
-        $remainingBalance = $balance ? $balance->remaining_balance : 300000;
+        $remainingBalance = $balance ? $balance->remaining_balance :1000000000;
 
         return view('merchant.dashboard', compact('voucherUsedThisMonth', 'remainingBalance'));
     }

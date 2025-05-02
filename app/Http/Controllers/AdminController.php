@@ -81,21 +81,21 @@ class AdminController extends Controller
             ],
             [
                 'used_balance' => 0,
-                'remaining_balance' => 300000,
+                'remaining_balance' => 1000000000,
             ]
         );
 
         $newVoucherValue = $request->value;
         $newUsedBalance = $balance->used_balance + $newVoucherValue;
 
-        if ($newUsedBalance > 300000) {
-            return redirect()->back()->with('error', 'Limit voucher bulanan untuk merchant ini telah tercapai (maksimal 300.000 per bulan).');
+        if ($newUsedBalance > 1000000000) {
+            return redirect()->back()->with('error', 'Limit');
         }
 
         // Update saldo
         $balance->update([
             'used_balance' => $newUsedBalance,
-            'remaining_balance' => 300000 - $newUsedBalance,
+            'remaining_balance' => 1000000000 - $newUsedBalance,
         ]);
 
         $voucher_id = 'VCH' . Carbon::now('Asia/Jakarta')->format('Ymd') . rand(100, 999);
@@ -245,7 +245,7 @@ class AdminController extends Controller
             $newUsedBalance = max(0, $balance->used_balance - $voucherValue);
             $balance->update([
                 'used_balance' => $newUsedBalance,
-                'remaining_balance' => 300000 - $newUsedBalance,
+                'remaining_balance' => 1000000000 - $newUsedBalance,
             ]);
         }
 
@@ -370,7 +370,7 @@ class AdminController extends Controller
 
             if ($user->role === 'merchant') {
                 $rules['merchant_name'] = 'required|string|max:255';
-                $rules['remaining_balance'] = 'required|numeric|min:0|max:300000';
+                $rules['remaining_balance'] = 'required|numeric|min:0|max:1000000000';
             }
 
             $messages = [
@@ -408,12 +408,12 @@ class AdminController extends Controller
                     ],
                     [
                         'used_balance' => 0,
-                        'remaining_balance' => 300000,
+                        'remaining_balance' => 1000000000,
                     ]
                 );
 
                 $newRemainingBalance = $request->remaining_balance;
-                $newUsedBalance = 300000 - $newRemainingBalance;
+                $newUsedBalance = 1000000000 - $newRemainingBalance;
 
                 $balance->update([
                     'used_balance' => $newUsedBalance,

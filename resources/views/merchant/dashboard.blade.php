@@ -11,7 +11,7 @@
 
 @section('sidebar-menu')
     <li>
-        <a href="#redeem-voucher" class="block p-2 hover:bg-gray-200 dark:hover:bg-gray-700 rounded">Redeem Voucher</a>
+        <a href="#redeem-voucher" class="block p-2 bg-gray-200 dark:bg-gray-700 rounded">Redeem Voucher</a>
     </li>
     <li>
         <a href="{{ route('merchant.redeemed-vouchers') }}" class="block p-2 hover:bg-gray-200 dark:hover:bg-gray-700 rounded">View Redeemed Vouchers</a>
