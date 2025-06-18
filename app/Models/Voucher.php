@@ -29,7 +29,6 @@ class Voucher extends Model
         'redeemed_at',
     ];
 
-    // Cast kolom tanggal sebagai datetime dengan timezone Asia/Jakarta
     protected $casts = [
         'created_date' => 'datetime:Y-m-d H:i:s',
         'expiration_date' => 'datetime:Y-m-d H:i:s',

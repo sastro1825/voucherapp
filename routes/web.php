@@ -5,12 +5,12 @@ use App\Http\Controllers\MerchantController;
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
 use Illuminate\Support\Facades\Route;
 
-// Redirect root (/) ke halaman login
+// Redirect root ke login
 Route::get('/', function () {
     return redirect()->route('login');
 });
 
-// Rute Publik (tanpa middleware auth)
+// Rute Publik 
 Route::get('/login', [AuthenticatedSessionController::class, 'create'])->name('login');
 // Terapkan rate limiting: maksimal 5 percobaan per menit
 Route::post('/login', [AuthenticatedSessionController::class, 'store'])->middleware('throttle:5,1');

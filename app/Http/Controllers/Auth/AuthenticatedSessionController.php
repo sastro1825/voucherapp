@@ -14,11 +14,22 @@ use App\Models\User;
 
 class AuthenticatedSessionController extends Controller
 {
+    /**
+     * Menampilkan form login.
+     *
+     * @return \Illuminate\View\View
+     */
     public function create()
     {
         return view('auth.login');
     }
 
+    /**
+     * Menangani proses login.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Illuminate\Http\RedirectResponse
+     */
     public function store(Request $request)
     {
         $request->validate([
@@ -27,7 +38,7 @@ class AuthenticatedSessionController extends Controller
         ]);
 
         $credentials = $request->only('username', 'password');
-        Log::info('Login attempt', $credentials);
+        Log::info('Login attempt', ['username' => $request->username]);
 
         if (!Auth::attempt($credentials, $request->boolean('remember'))) {
             Log::info('Login failed for username: ' . $request->username);
@@ -41,15 +52,22 @@ class AuthenticatedSessionController extends Controller
         $request->session()->regenerate();
         Log::info('Session regenerated, user_id: ' . Auth::id() . ', role: ' . $user->role);
 
+        // Menggunakan redirect()->intended untuk menghindari redirect besar
         if ($user->role === 'admin') {
-            return redirect()->route('admin.create-voucher');
+            return redirect()->intended(route('admin.create-voucher'));
         } elseif ($user->role === 'merchant') {
-            return redirect()->route('merchant.dashboard');
+            return redirect()->intended(route('merchant.dashboard'));
         }
 
-        return redirect('/login');
+        return redirect()->intended('/login');
     }
 
+    /**
+     * Menangani proses logout.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Illuminate\Http\RedirectResponse
+     */
     public function destroy(Request $request)
     {
         Auth::guard('web')->logout();
@@ -58,11 +76,22 @@ class AuthenticatedSessionController extends Controller
         return redirect('/login');
     }
 
+    /**
+     * Menampilkan form registrasi.
+     *
+     * @return \Illuminate\View\View
+     */
     public function showRegisterForm()
     {
         return view('auth.register');
     }
 
+    /**
+     * Menangani proses registrasi.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Illuminate\Http\RedirectResponse
+     */
     public function register(Request $request)
     {
         $request->validate([
@@ -101,14 +130,25 @@ class AuthenticatedSessionController extends Controller
         Auth::login($user);
         $request->session()->regenerate();
 
-        return redirect()->route('merchant.dashboard')->with('success', 'Registration successful! Welcome, ' . $user->username);
+        return redirect()->intended(route('merchant.dashboard'))->with('success', 'Registration successful! Welcome, ' . $user->username);
     }
 
+    /**
+     * Menampilkan form permintaan reset password.
+     *
+     * @return \Illuminate\View\View
+     */
     public function showResetRequestForm()
     {
         return view('auth.passwords.email');
     }
 
+    /**
+     * Mengirim link reset password melalui WhatsApp.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Illuminate\Http\RedirectResponse
+     */
     public function sendResetLink(Request $request)
     {
         $request->validate([
@@ -178,11 +218,24 @@ class AuthenticatedSessionController extends Controller
         return redirect()->back()->with('status', 'Link reset telah dikirim ke nomor WhatsApp Anda.');
     }
 
+    /**
+     * Menampilkan form reset password.
+     *
+     * @param  string  $token
+     * @param  string  $username
+     * @return \Illuminate\View\View
+     */
     public function showResetForm($token, $username)
     {
         return view('auth.passwords.reset', compact('token', 'username'));
     }
 
+    /**
+     * Menangani proses reset password.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Illuminate\Http\RedirectResponse
+     */
     public function reset(Request $request)
     {
         $request->validate([
@@ -225,11 +278,22 @@ class AuthenticatedSessionController extends Controller
         return redirect()->route('login')->with('status', 'Kata sandi telah berhasil direset.');
     }
 
+    /**
+     * Menampilkan halaman profil pengguna.
+     *
+     * @return \Illuminate\View\View
+     */
     public function showProfile()
     {
         return view('auth.profile');
     }
 
+    /**
+     * Memperbarui profil pengguna.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Illuminate\Http\RedirectResponse
+     */
     public function updateProfile(Request $request)
     {
         $user = Auth::user();

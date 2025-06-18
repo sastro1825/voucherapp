@@ -23,7 +23,6 @@ class RedeemedVoucher extends Model
         return $this->belongsTo(User::class, 'user_id', 'id');
     }
 
-    // Accessor untuk memformat redeemed_at dengan timezone WIB
     public function getRedeemedAtAttribute($value)
     {
         return Carbon::parse($value)->timezone('Asia/Jakarta')->format('Y-m-d H:i:s');

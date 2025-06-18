@@ -69,7 +69,6 @@ class AdminController extends Controller
 
         $merchant = User::findOrFail($request->merchant_id);
 
-        // Check balance in merchant_balances
         $currentMonth = Carbon::now('Asia/Jakarta')->startOfMonth();
         $year = Carbon::now('Asia/Jakarta')->year;
         $month = Carbon::now('Asia/Jakarta')->month;
@@ -93,7 +92,6 @@ class AdminController extends Controller
             return redirect()->back()->with('error', 'Limit exceeded');
         }
 
-        // Update balance
         $balance->update([
             'used_balance' => $newUsedBalance,
             'remaining_balance' => 1000000000 - $newUsedBalance,
