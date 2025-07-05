@@ -10,6 +10,7 @@
 @endsection
 
 @section('sidebar-menu')
+    {{-- menu sidebar merchant --}}
     <li>
         <a href="{{ route('merchant.dashboard') }}#redeem-voucher" class="block p-2 hover:bg-gray-200 dark:hover:bg-gray-700 rounded">Redeem Voucher</a>
     </li>
@@ -29,6 +30,7 @@
 
 @section('content')
     <h1 class="text-3xl font-bold mb-6">Redeemed Vouchers</h1>
+    {{-- tabel voucher yang sudah diredeem --}}
     <div class="bg-white dark:bg-gray-800 p-6 rounded shadow">
         <style>
             .centered-table th,

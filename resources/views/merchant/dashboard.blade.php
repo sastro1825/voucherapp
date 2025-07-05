@@ -3,6 +3,7 @@
 @section('title', 'Merchant Dashboard')
 
 @section('sidebar-title')
+    {{-- sidebar logo --}}
     <div class="flex flex-col items-center mb-4">
         <img src="{{ asset('images/FT.png') }}" alt="Logo" class="h-12 w-auto mb-2">
         <span class="text-lg font-semibold text-gray-800 dark:text-gray-200">Merchant Panel</span>
@@ -10,6 +11,7 @@
 @endsection
 
 @section('sidebar-menu')
+    {{-- menu sidebar merchant --}}
     <li>
         <a href="#redeem-voucher" class="block p-2 bg-gray-200 dark:bg-gray-700 rounded">Redeem Voucher</a>
     </li>
@@ -20,6 +22,7 @@
         <a href="{{ route('profile') }}" class="block p-2 hover:bg-gray-200 dark:hover:bg-gray-700 rounded">Profil</a>
     </li>
     <li>
+        {{-- Bagian tombol logout di sidebar --}}
         <form method="POST" action="{{ route('logout') }}">
             @csrf
             <button type="submit" class="block w-full text-left p-2 hover:bg-gray-200 dark:hover:bg-gray-700 rounded">Logout</button>
@@ -28,7 +31,7 @@
 @endsection
 
 @section('content')
-    <!-- Notification -->
+    {{-- notifikasi --}}
     @if (session('success'))
         <div id="registration-notification">
             {{ session('success') }}
@@ -40,19 +43,20 @@
         </div>
     @endif
 
+    {{-- judul halaman dashboard --}}
     <h1 class="text-3xl font-bold mb-6">Welcome, {{ Auth::user()->username }}!</h1>
 
-    <!-- Saldo Voucher -->
+    {{-- tampilan saldo voucher --}}
     <div class="mb-6 bg-white dark:bg-gray-800 p-6 rounded shadow">
         <h2 class="text-xl font-semibold mb-2">Saldo Voucher Bulan Ini</h2>
         <p class="text-lg font-bold">Sisa Saldo: {{ $remainingBalance }}</p>
     </div>
 
-    <!-- Redeem Voucher -->
+    {{-- form redeem voucher --}}
     <div id="redeem-voucher" class="mb-6 bg-white dark:bg-gray-800 p-6 rounded shadow">
         <h2 class="text-xl font-semibold mb-2">Redeem Voucher</h2>
         
-        <!-- Form Manual Input -->
+        {{-- input manual voucher --}}
         <form method="POST" action="{{ route('merchant.redeem-voucher') }}" id="redeem-form" onsubmit="return confirm('Apakah Anda yakin ingin redeem voucher ini?')">
             @csrf
             <input type="text" name="voucher_id" id="voucher_id" class="w-full p-2 border rounded dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100" 
@@ -65,7 +69,7 @@
             </button>
         </form>
 
-        <!-- Scan Barcode Section -->
+        {{-- pindai barcode --}}
         <div class="mt-4">
             <button id="start-scan" class="bg-blue-600 text-white py-2 px-4 rounded hover:bg-blue-700">Scan Barcode</button>
             <div id="scanner-container" class="mt-4 hidden">
@@ -77,7 +81,7 @@
 @endsection
 
 @section('scripts')
-    <!-- ZXing Library -->
+    {{-- skrip untuk pendai barcode --}}
     <script src="https://unpkg.com/@zxing/library@latest"></script>
     <script>
         const startScanButton = document.getElementById('start-scan');
@@ -121,7 +125,7 @@
             startScanButton.classList.remove('hidden');
         }
 
-        // Auto-refresh after 3 seconds for both notifications
+        {{-- refresh --}}
         const notification = document.getElementById('notification');
         const registrationNotification = document.getElementById('registration-notification');
         if (notification || registrationNotification) {

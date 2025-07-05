@@ -14,6 +14,7 @@ class MerchantBalance extends Model
         'remaining_balance',
     ];
 
+    // Relasi dengan model User
     public function merchant()
     {
         return $this->belongsTo(User::class, 'merchant_id');

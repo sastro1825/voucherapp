@@ -3,10 +3,11 @@
         {{ __('This is a secure area of the application. Please confirm your password before continuing.') }}
     </div>
 
+    {{-- form konfirmasi password --}}
     <form method="POST" action="{{ route('password.confirm') }}">
         @csrf
 
-        <!-- Password -->
+        {{-- input password --}}
         <div>
             <x-input-label for="password" :value="__('Password')" />
 

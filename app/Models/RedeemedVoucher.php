@@ -13,11 +13,13 @@ class RedeemedVoucher extends Model
         'redeemed_at' => 'datetime:Y-m-d H:i:s',
     ];
 
+    // Relasi dengan model Voucher
     public function voucher()
     {
         return $this->belongsTo(Voucher::class, 'voucher_id', 'id');
     }
 
+    // Relasi dengan model User
     public function user()
     {
         return $this->belongsTo(User::class, 'user_id', 'id');

@@ -1,6 +1,7 @@
 @extends('layouts.guest')
 
 @section('content')
+    {{-- Formulir reset password --}}
     <div class="w-full max-w-md p-6 bg-white rounded-lg shadow-md">
         <h2 class="text-2xl font-bold text-center mb-6">Reset Your Password</h2>
         

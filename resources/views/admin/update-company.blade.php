@@ -3,6 +3,7 @@
 @section('title', 'Update Company Name')
 
 @section('sidebar-title')
+    {{-- sidebar dengan logo --}}
     <div class="flex flex-col items-center mb-4">
         <img src="{{ asset('images/FT.png') }}" alt="Logo" class="h-12 w-auto mb-2">
         <span class="text-lg font-semibold text-gray-800 dark:text-gray-200">Admin Panel</span>
@@ -10,6 +11,7 @@
 @endsection
 
 @section('sidebar-menu')
+    {{-- menu sidebar admin --}}
     <li>
         <a href="{{ route('admin.create-voucher') }}" class="block p-2 hover:bg-gray-200 dark:hover:bg-gray-700 rounded">Create Voucher</a>
     </li>
@@ -23,6 +25,7 @@
         <a href="{{ route('admin.users') }}" class="block p-2 hover:bg-gray-200 dark:hover:bg-gray-700 rounded">View All Users</a>
     </li>
     <li x-data="{ showSetting: false }">
+        {{-- dropdown pengaturan sidebar --}}
         <button @click="showSetting = !showSetting" class="block p-2 hover:bg-gray-200 dark:hover:bg-gray-700 rounded w-full text-left flex justify-between items-center">
             Setting
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
@@ -47,10 +50,13 @@
 @endsection
 
 @section('content')
+    {{-- form update nama perusahaan --}}
     <div class="mb-6 bg-white dark:bg-gray-800 p-6 rounded shadow">
         <h2 class="text-2xl font-bold mb-4">Update Company Name</h2>
         @if (session('success') || session('updated'))
-            
+            <div class="bg-green-100 text-green-700 p-4 rounded mb-4 notification">
+                {{ session('success') ?? session('updated') }}
+            </div>
         @endif
         @if (session('error'))
             <div class="bg-red-100 text-red-700 p-4 rounded mb-4 notification">

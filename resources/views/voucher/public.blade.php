@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Voucher - {{ $voucher->id }}</title>
     <link href="{{ asset('css/app.css') }}" rel="stylesheet">
+    {{-- styling untuk voucher --}}
     <style>
         body {
             background: linear-gradient(135deg, #ffe6f0 0%, #e6f0ff 100%);
@@ -186,9 +187,11 @@
     </style>
 </head>
 <body>
+    {{-- kontainer voucher --}}
     <div class="voucher-container">
         <div class="voucher-header">Gift Voucher</div>
         
+        {{-- detail voucher --}}
         <div class="voucher-details">
             <p><strong>ID:</strong> <span>{{ $voucher->id }}</span></p>
             <p><strong>Company:</strong> <span>{{ $voucher->company_name }}</span></p>
@@ -212,15 +215,18 @@
             @endif
         </div>
 
+        {{-- syarat dan ketentuan --}}
         <div class="terms">
             Syarat dan Ketentuan Berlaku: Minimum Pembelanjaan {{ $voucher->value * 2 }}
         </div>
 
+        {{-- pindai barcode --}}
         <div class="barcode-container">
             <h2>Scan Me</h2>
             {!! $qrCode !!}
         </div>
 
+        {{-- cetak --}}
         <div class="no-print">
             <button onclick="window.print()" class="print-button">Print Voucher</button>
         </div>

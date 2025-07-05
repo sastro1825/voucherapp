@@ -3,6 +3,7 @@
 @section('title', 'Profile')
 
 @section('sidebar-title')
+    {{-- sidebar sesuai role pengguna --}}
     <div class="flex flex-col items-center mb-4">
         <img src="{{ asset('images/FT.png') }}" alt="Logo" class="h-12 w-auto mb-2">
         <span class="text-lg font-semibold text-gray-800 dark:text-gray-200">
@@ -13,7 +14,7 @@
 
 @section('sidebar-menu')
     @if (auth()->user()->role === 'admin')
-        <!-- Sidebar untuk Admin -->
+        {{-- menu sidebar untuk admin --}}
         <li>
             <a href="{{ route('admin.create-voucher') }}" class="block p-2 hover:bg-gray-200 dark:hover:bg-gray-700 rounded">Create Voucher</a>
         </li>
@@ -27,6 +28,7 @@
             <a href="{{ route('admin.users') }}" class="block p-2 hover:bg-gray-200 dark:hover:bg-gray-700 rounded">View All Users</a>
         </li>
         <li x-data="{ showSetting: false }">
+            {{-- dropdown pengaturan sidebar --}}
             <button @click="showSetting = !showSetting" class="block p-2 hover:bg-gray-200 dark:hover:bg-gray-700 rounded w-full text-left flex justify-between items-center">
                 Setting
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
@@ -49,7 +51,7 @@
             </form>
         </li>
     @else
-        <!-- Sidebar untuk Merchant -->
+        {{-- menu sidebar untuk merchant --}}
         <li>
             <a href="{{ route('merchant.dashboard') }}#redeem-voucher" class="block p-2 hover:bg-gray-200 dark:hover:bg-gray-700 rounded">Redeem Voucher</a>
         </li>
@@ -69,13 +71,14 @@
 @endsection
 
 @section('content')
-    <!-- Notification -->
+    {{-- Bagian notifikasi --}}
     @if (session('notification'))
         <div class="mb-6 p-4 rounded {{ session('notification.type') === 'success' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800' }}" id="notification">
             {{ session('notification.message') }}
         </div>
     @endif
 
+    {{-- form update profil --}}
     <div class="mb-6 bg-white dark:bg-gray-800 p-6 rounded shadow">
         <h2 class="text-2xl font-bold mb-4">Profil {{ auth()->user()->role === 'admin' ? 'Admin' : 'Merchant' }}</h2>
         <form method="POST" action="{{ route('profile.update') }}">
@@ -110,8 +113,8 @@
 @endsection
 
 @section('scripts')
+    {{-- refresh --}}
     <script>
-        // Auto-hide notification and refresh after 3 seconds if notification exists
         const notification = document.getElementById('notification');
         if (notification) {
             setTimeout(() => {

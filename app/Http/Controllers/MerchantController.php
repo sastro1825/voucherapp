@@ -11,65 +11,56 @@ use Carbon\Carbon;
 
 class MerchantController extends Controller
 {
+    // Tampilkan dashboard merchant
     public function dashboard()
     {
         if (!Auth::check() || Auth::user()->role !== 'merchant') {
             return redirect('/login');
         }
-
         $year = Carbon::now('Asia/Jakarta')->year;
         $month = Carbon::now('Asia/Jakarta')->month;
-
         $balance = MerchantBalance::where('merchant_id', Auth::id())
             ->where('year', $year)
             ->where('month', $month)
             ->first();
-
         $voucherUsedThisMonth = $balance ? $balance->used_balance : 0;
-        $remainingBalance = $balance ? $balance->remaining_balance :1000000000;
-
+        $remainingBalance = $balance ? $balance->remaining_balance : 1000000000;
         return view('merchant.dashboard', compact('voucherUsedThisMonth', 'remainingBalance'));
     }
 
+    // Proses penukaran voucher
     public function redeemVoucher(Request $request)
     {
         if (!Auth::check() || Auth::user()->role !== 'merchant') {
             return redirect('/login');
         }
-
         $request->validate(['voucher_id' => 'required']);
         $voucher = Voucher::find($request->voucher_id);
-
         if (!$voucher) {
-            return redirect()->back()->with('notification', ['type' => 'error', 'message' => 'Voucher not found!']);
+            return redirect()->back()->with('notification', ['type' => 'error', 'message' => 'Voucher tidak ditemukan!']);
         }
-
         if ($voucher->status !== 'Active' || Carbon::parse($voucher->expiration_date, 'Asia/Jakarta') < Carbon::now('Asia/Jakarta')) {
             $voucher->status = Carbon::parse($voucher->expiration_date, 'Asia/Jakarta') < Carbon::now('Asia/Jakarta') ? 'Expired' : $voucher->status;
             $voucher->save();
-            return redirect()->back()->with('notification', ['type' => 'error', 'message' => 'Voucher is invalid or expired!']);
+            return redirect()->back()->with('notification', ['type' => 'error', 'message' => 'Voucher tidak valid atau kadaluarsa!']);
         }
-
-        // Periksa apakah merchant yang login adalah merchant yang terkait dengan voucher
         if ($voucher->merchant_id !== Auth::id()) {
-            return redirect()->back()->with('notification', ['type' => 'error', 'message' => 'You are not authorized to redeem this voucher!']);
+            return redirect()->back()->with('notification', ['type' => 'error', 'message' => 'Anda tidak berhak menukar voucher ini!']);
         }
-
         $voucher->update([
             'status' => 'Redeemed',
             'redeemed_by' => Auth::user()->username,
             'redeemed_at' => Carbon::now('Asia/Jakarta'),
         ]);
-
         RedeemedVoucher::create([
             'voucher_id' => $voucher->id,
             'user_id' => Auth::id(),
             'redeemed_at' => Carbon::now('Asia/Jakarta'),
         ]);
-
-        return redirect()->back()->with('notification', ['type' => 'success', 'message' => 'Voucher redeemed successfully!']);
+        return redirect()->back()->with('notification', ['type' => 'success', 'message' => 'Voucher berhasil ditukar!']);
     }
 
+    // Daftar voucher yang sudah ditukar
     public function redeemedVouchers()
     {
         if (!Auth::check() || Auth::user()->role !== 'merchant') {

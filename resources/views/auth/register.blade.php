@@ -1,6 +1,7 @@
 @extends('layouts.guest')
 
 @section('content')
+    {{-- form registrasi dengan logo --}}
     <div class="w-full max-w-md p-6 bg-white rounded-lg shadow-md">
         <div class="flex justify-center mb-4">
             <img src="{{ asset('images/FT.png') }}" alt="Logo" class="h-16 w-auto">
@@ -52,6 +53,7 @@
                 Register
             </button>
         </form>
+        {{-- link login --}}
         <div class="mt-4 text-center">
             <p class="text-sm text-gray-600">Already have an account? <a href="{{ route('login') }}" class="text-indigo-600 hover:underline">Login here</a></p>
         </div>

@@ -5,6 +5,7 @@
 @section('sidebar-title', 'Admin Panel')
 
 @section('sidebar-menu')
+    {{-- menu sidebar admin --}}
     <li>
         <a href="{{ route('admin.create-voucher') }}" class="block p-2 hover:bg-gray-200 dark:hover:bg-gray-700 rounded">Create Voucher</a>
     </li>
@@ -17,6 +18,7 @@
     <li>
         <a href="{{ route('admin.users') }}" class="block p-2 hover:bg-gray-200 dark:hover:bg-gray-700 rounded">View All Users</a>
     </li>
+    {{-- dropdown pengaturan di sidebar --}}
     <li x-data="{ showSetting: false }">
         <button @click="showSetting = !showSetting" class="block p-2 hover:bg-gray-200 dark:hover:bg-gray-700 rounded w-full text-left flex justify-between items-center">
             Setting
@@ -43,6 +45,7 @@
 
 @section('content')
     <h1 class="text-3xl font-bold mb-6">Edit Voucher: {{ $voucher->id }}</h1>
+    {{-- formulir edit voucher --}}
     <div class="bg-white dark:bg-gray-800 p-6 rounded shadow">
         <form method="POST" action="{{ route('voucher.edit', $voucher->id) }}">
             @csrf
@@ -54,6 +57,7 @@
                     <span class="text-red-500 text-sm">{{ $message }}</span>
                 @enderror
             </div>
+            {{-- tombol submit dan cancel --}}
             <div class="flex space-x-6">
                 <button type="submit" class="bg-green-600 text-white py-2 px-4 rounded hover:bg-green-700 transition">
                     Update Voucher

@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\Auth;
 
 class Role
 {
+    // Cek peran pengguna sebelum mengakses rute
     public function handle(Request $request, Closure $next, $role)
     {
         if (!Auth::check() || Auth::user()->role !== $role) {

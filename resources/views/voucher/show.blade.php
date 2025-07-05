@@ -5,6 +5,7 @@
 @section('sidebar-title', 'Admin Panel')
 
 @section('sidebar-menu')
+    {{-- menu sidebar admin --}}
     <li>
         <a href="{{ route('admin.dashboard') }}#update-company" class="block p-2 hover:bg-gray-200 dark:hover:bg-gray-700 rounded">Update Company Name</a>
     </li>
@@ -26,10 +27,12 @@
 @endsection
 
 @section('content')
+    {{-- kontainer voucher --}}
     <div class="flex justify-center items-center min-h-screen bg-wrapper">
         <div class="voucher-container">
             <div class="voucher-header">Gift Voucher</div>
             
+            {{-- detail voucher --}}
             <div class="voucher-details">
                 <p><strong>ID:</strong> <span>{{ $voucher->id }}</span></p>
                 <p><strong>Company:</strong> <span>{{ $voucher->company_name }}</span></p>
@@ -44,11 +47,13 @@
                 @endif
             </div>
 
+            {{-- pindai barcode --}}
             <div class="barcode-container">
                 <h2>Scan Me</h2>
                 {!! $qrCode !!}
             </div>
 
+            {{-- tombol cetak --}}
             <div class="no-print">
                 <button onclick="window.print()" class="print-button">Print Voucher</button>
             </div>
@@ -57,8 +62,8 @@
 @endsection
 
 @section('styles')
+    {{-- styling untuk voucher --}}
     <style>
-        /* Font Poppins */
         @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap');
 
         .bg-wrapper {
@@ -71,7 +76,7 @@
             border-radius: 12px;
             box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
             padding: 0.75rem;
-            width: 300px; /* Ukuran lebih kecil */
+            width: 300px;
             height: auto;
             position: relative;
             overflow: hidden;
@@ -131,7 +136,7 @@
         }
 
         .barcode-container svg, .barcode-container img {
-            width: 100px; /* Ukuran barcode lebih kecil */
+            width: 100px; 
             height: 100px;
             display: block;
             margin: 0 auto;
@@ -159,7 +164,6 @@
             transform: scale(1.05);
         }
 
-        /* Dekorasi tambahan */
         .voucher-container::before {
             content: '';
             position: absolute;
@@ -184,10 +188,10 @@
 
         @media print {
             body, .container, .sidebar, header, footer, .bg-wrapper {
-                display: none; /* Sembunyikan semua elemen kecuali voucher */
+                display: none; 
             }
             .voucher-container {
-                display: block !important; /* Pastikan voucher muncul */
+                display: block !important; 
                 border: 3px dashed #ff5722;
                 box-shadow: none;
                 padding: 0.75rem;
@@ -212,7 +216,7 @@
                 display: none; /* Sembunyikan tombol print */
             }
             .voucher-container::before, .voucher-container::after {
-                display: none; /* Hilangkan dekorasi saat cetak */
+                display: none;
             }
         }
     </style>

@@ -3,6 +3,7 @@
 @section('title', 'All Vouchers')
 
 @section('sidebar-title')
+    {{-- judul sidebar --}}
     <div class="flex flex-col items-center mb-4">
         <img src="{{ asset('images/FT.png') }}" alt="Logo" class="h-12 w-auto mb-2">
         <span class="text-lg font-semibold text-gray-800 dark:text-gray-200">Admin Panel</span>
@@ -10,6 +11,7 @@
 @endsection
 
 @section('sidebar-menu')
+    {{-- menu sidebar admin --}}
     <li>
         <a href="{{ route('admin.create-voucher') }}" class="block p-2 hover:bg-gray-200 dark:hover:bg-gray-700 rounded">Create Voucher</a>
     </li>
@@ -23,6 +25,7 @@
         <a href="{{ route('admin.users') }}" class="block p-2 hover:bg-gray-200 dark:hover:bg-gray-700 rounded">View All Users</a>
     </li>
     <li x-data="{ showSetting: false }">
+        {{-- dropdown pengaturan sidebar --}}
         <button @click="showSetting = !showSetting" class="block p-2 hover:bg-gray-200 dark:hover:bg-gray-700 rounded w-full text-left flex justify-between items-center">
             Setting
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
@@ -48,8 +51,6 @@
 
 @section('content')
     <h1 class="text-3xl font-bold mb-6">All Vouchers</h1>
-
-    <!-- Notification -->
     @if (session('success'))
         <div id="notification">
         </div>
@@ -63,7 +64,7 @@
         </div>
     @endif
 
-    <!-- Filter -->
+    {{-- filter status voucher --}}
     <div class="mb-6">
         <label for="filter" class="mr-2">Filter by Status:</label>
         <select id="filter" onchange="window.location.href='{{ route('admin.vouchers') }}?filter='+this.value" 
@@ -75,7 +76,7 @@
         </select>
     </div>
 
-    <!-- Table -->
+    {{-- abel daftar voucher --}}
     <div class="bg-white dark:bg-gray-800 p-6 rounded shadow overflow-x-auto">
         <table class="w-full border-collapse text-sm">
             <thead>
@@ -104,6 +105,7 @@
                         <td class="p-2">{{ $voucher->redeemed_by ?? '-' }}</td>
                         <td class="p-2">{{ $voucher->redeemed_at ? \Carbon\Carbon::parse($voucher->redeemed_at)->timezone('Asia/Jakarta')->format('Y-m-d H:i:s') : '-' }}</td>
                         <td class="p-2">
+                            {{-- tombol (open, edit, delete) --}}
                             <div class="flex items-center justify-center space-x-2">
                                 <a href="{{ route('voucher.send', $voucher->id) }}" 
                                    class="inline-flex items-center w-24 px-4 py-2 bg-green-600 text-white text-sm font-medium rounded-lg shadow-sm hover:bg-green-700 dark:bg-green-500 dark:hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-green-500 transition duration-150">
@@ -135,6 +137,7 @@
                             </div>
                         </td>
                         <td class="p-2">
+                            {{-- tombol kirim ke WA --}}
                             <div class="flex items-center justify-start gap-4">
                                 <button type="button" 
                                         class="inline-flex items-center min-w-[96px] px-4 py-2 text-white text-sm font-medium rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-150 flex-shrink-0
@@ -163,7 +166,7 @@
         </table>
     </div>
 
-    <!-- Modal untuk Input Nomor WhatsApp -->
+    {{-- input nomor WA --}}
     <div id="whatsappModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 flex items-center justify-center hidden">
         <div class="bg-white dark:bg-gray-800 p-6 rounded shadow-lg w-full max-w-md">
             <h2 class="text-xl font-bold mb-4 text-gray-900 dark:text-gray-100">Kirim Link Voucher ke WhatsApp</h2>
@@ -184,7 +187,7 @@
                         Batal
                     </button>
                     <button type="submit" 
-                            class="px-4 py-2Proto-onboarding: The prototype is ready to be tested! bg-blue-600 text-white rounded hover:bg-blue-700 transition">
+                            class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition">
                         Kirim
                     </button>
                 </div>
@@ -194,11 +197,13 @@
 @endsection
 
 @section('scripts')
+    {{-- untuk membuka link WA --}}
     @if (session('public_url'))
         <script>
             window.open("{{ session('public_url') }}", "_blank");
         </script>
     @endif
+    {{-- logika WA dan notifikasi --}}
     <script>
         // Define messages from Blade session
         const notificationMessages = {
@@ -211,26 +216,22 @@
         const closeModalBtn = document.getElementById('closeModal');
         const form = document.getElementById('whatsappForm');
 
-        // Open modal when "Kirim ke WhatsApp" button is clicked
         document.querySelectorAll('.open-whatsapp-modal').forEach(button => {
             button.addEventListener('click', () => {
                 const voucherId = button.getAttribute('data-voucher-id');
-                // Set form action dynamically
                 const url = '{{ route("voucher.send-to-whatsapp", ["voucherId" => "voucherIdPlaceholder", "whatsappNumber" => "whatsappNumberPlaceholder"]) }}'
                     .replace('voucherIdPlaceholder', voucherId)
-                    .replace('whatsappNumberPlaceholder', ''); // Will be filled by input
+                    .replace('whatsappNumberPlaceholder', '');
                 form.action = url.replace('/whatsappNumberPlaceholder', '') + '/' + document.getElementById('whatsapp_number').value;
                 modal.classList.remove('hidden');
             });
         });
 
-        // Close modal when "Batal" button is clicked
         closeModalBtn.addEventListener('click', () => {
             modal.classList.add('hidden');
             form.reset();
         });
 
-        // Update form action when WhatsApp number is input
         document.getElementById('whatsapp_number').addEventListener('input', () => {
             const whatsappNumber = document.getElementById('whatsapp_number').value;
             const voucherId = form.action.match(/voucher\/(.+?)\/send-to-whatsapp/)[1];
@@ -240,7 +241,6 @@
             form.action = url;
         });
 
-        // Close modal when clicking outside the modal
         modal.addEventListener('click', (e) => {
             if (e.target === modal) {
                 modal.classList.add('hidden');
@@ -248,7 +248,6 @@
             }
         });
 
-        // Auto-refresh after 3 seconds for specific messages
         const specificMessages = [
             'Voucher can be opened',
             'Voucher updated successfully!',
@@ -258,7 +257,6 @@
             'Voucher link sent to WhatsApp successfully.'
         ];
 
-        // Check for notifications and trigger refresh if needed
         const notification = document.getElementById('notification');
         if (notification) {
             const currentMessage = notificationMessages.success || notificationMessages.error || notificationMessages.warning;
